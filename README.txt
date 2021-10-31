@@ -22,3 +22,14 @@ ENGINE_IMAGGA_IMAGGA_API_URL="https://api.imagga.com/v2"
 ENGINE_IMAGGA_INPUT_LOCATION="data/images/input"
 ENGINE_IMAGGA_OUTPUT_LOCATION="data/images/output"
 DB_URL="sqlite:///tigertag.db"
+
+Database Lifecycle
+create    alembic upgrade head
+status    alembic current
+history   alembic history --verbose
+revise    alembic revision -m "whatever you are going to do"
+    This creates a file where you do your work
+downgrade alembic downgrade <how many steps. ex: -1>
+revision  alembic upgrade <specific revision. ex: ae10>
+delete    alembic downgrade base
+

@@ -39,7 +39,7 @@ class EnvironmentEngineBuilder(EngineBuilder):
         super().__init__()
 
     def build(self):
-        if 'DB_URL' in os.environ.items():
+        if 'DB_URL' in os.environ:
             db_url = os.environ.get('DB_URL')
             return Engine(db_url)
         else:

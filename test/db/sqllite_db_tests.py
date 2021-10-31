@@ -15,7 +15,7 @@ from alembicverify.util import (
     make_alembic_config,
 )
 
-from sqlalchemy.sql import select
+from sqlalchemy.sql import select, text
 
 DB_NAME = 'tigertag_demo.db'
 DB_URL = 'sqlite:///{}'.format(DB_NAME)
@@ -28,37 +28,73 @@ class TestEngine(unittest.TestCase):
         if os.path.exists(DB_NAME):
             os.remove(DB_NAME)
         self.e = Engine(DB_URL)
-        self.c = None
+        # self.c = None
 
     def test_init(self):
         self.assertEqual(self.e.db_url, DB_URL)
 
-    def test_connect(self):
-        self.c = self.e.connect()
+    # def test_connect(self):
+    #     self.c = self.e.connect()
 
     def tearDown(self):
-        if self.c:
-            self.c.close()
+        # if self.c:
+        #     self.c.close()
         self.e.dispose()
         if os.path.exists(DB_NAME):
             os.remove(DB_NAME)
 
 
-class TestEngineWithData(unittest.TestCase):
-    # HELPFUL https://alembic-verify.readthedocs.io/en/latest/example_unittest.html
+class BaseSqlite(unittest.TestCase):
     def setUp(self):
+        # HELPFUL https://alembic-verify.readthedocs.io/en/latest/example_unittest.html
         if os.path.exists(DB_NAME):
             os.remove(DB_NAME)
 
-        self.test_uri = (DB_URL)
+        self.test_uri = DB_URL
         self.alembic_config = make_alembic_config(
             self.test_uri, ALEMBIC_ROOT)
         self.alembic_config.config_file_name = ALEMBIC_LOG_CONFIG
         new_db(self.test_uri)
         command.upgrade(self.alembic_config, 'head')
 
+    def tearDown(self):
+        self.e.dispose()
+        destroy_database(self.test_uri)
+        if os.path.exists(DB_NAME):
+            os.remove(DB_NAME)
+
+
+class TestEnvironmentEngineBuilder(BaseSqlite):
+    def setUp(self):
+        super().setUp()
+        os.environ['DB_URL'] = DB_URL
+        builder = EnvironmentEngineBuilder()
+        self.e = builder.build()
+
+    def test_current_time_raw(self):
+        date_format = "%Y-%m-%d"
+        with self.e.connect() as con:
+            rs = con.execute("SELECT strftime('{}','now')".format(date_format))
+            for row in rs:
+                temp_date = datetime.date.today().strftime(date_format)
+                self.assertEqual(row[0], temp_date)
+                break
+
+    def test_current_time_raw_text(self):
+        date_format = "%Y-%m-%d"
+        statement = text("""SELECT strftime('{}','now')""".format(date_format))
+        with self.e.connect() as con:
+            rs = con.execute(statement)
+            for row in rs:
+                temp_date = datetime.date.today().strftime(date_format)
+                self.assertEqual(row[0], temp_date)
+                break
+
+
+class TestEngineWithData(BaseSqlite):
+    def setUp(self):
+        super().setUp()
         self.e = Engine(DB_URL)
-        self.c = None
 
     def temp_tag_obj(self):
         return Tag(
@@ -121,11 +157,3 @@ class TestEngineWithData(unittest.TestCase):
             self.assertEqual('person', new_tag.name)
             self.assertEqual('IMAGGA', new_tag.engine)
             self.assertEqual(45, new_tag.percent_match)
-
-    def tearDown(self):
-        if self.c:
-            self.c.close()
-        self.e.dispose()
-        destroy_database(self.test_uri)
-        if os.path.exists(DB_NAME):
-            os.remove(DB_NAME)
