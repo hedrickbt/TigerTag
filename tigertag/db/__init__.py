@@ -1,9 +1,11 @@
 import logging
 import os
-
-from sqlalchemy import create_engine
+import sqlalchemy
+from sqlalchemy import create_engine, select
 from sqlalchemy import MetaData
 from sqlalchemy.orm import sessionmaker
+
+from tigertag.db.models import *
 
 logger = logging.getLogger(__name__)
 
@@ -44,3 +46,74 @@ class EnvironmentEngineBuilder(EngineBuilder):
             return Engine(db_url)
         else:
             raise ValueError("DB_URL environment variable missing.")
+
+
+class Persist:
+    def __init__(self, dbengine):
+        self.engine = dbengine
+
+    @staticmethod
+    def _row_to_dict(row):
+        d = {}
+        for column in row.__table__.columns:
+            d[column.name] = getattr(row, column.name)
+            # if isinstance(column.type, sqlalchemy.types.Integer):
+            #     d[column.name] = getattr(row, column.name)
+            # else:
+            #     d[column.name] = str(getattr(row, column.name))
+        return d
+
+    def _handle_tags(self, session, resource, engine, tags):
+        if engine is not None:
+            if tags is not None:
+                temp_resource_tags = []
+                for tag_name, tag_values in tags.items():
+                    tag = Tag(
+                        name=tag_name,
+                        engine=engine,
+                        confidence=tag_values['confidence'],
+                    )
+                    session.add(tag)
+                    temp_resource_tags.append(tag)
+                resource.tags = temp_resource_tags
+            else:
+                raise ValueError('While trying to set a resource, the tags were None.')
+        else:
+            if tags is not None:
+                raise ValueError('While trying to set a resource, the engine was None.')
+
+    def set_resource(self, name, location, hashval, last_indexed, description=None, engine=None, tags=None):
+        with self.engine.session() as session, session.begin():
+            existing_resource = session.execute(select(Resource).filter_by(location=location)).one_or_none()
+            new_record = False
+            if existing_resource is None:
+                resource = Resource()
+                new_record = True
+            else:
+                resource = existing_resource
+
+            resource.name = name
+            resource.location = location
+            resource.hashval = hashval
+            resource.last_indexed = last_indexed
+
+            if description is not None:
+                resource.description = description
+            if new_record:
+                session.add(resource)
+            self._handle_tags(session, resource, engine, tags)
+
+            return Persist._row_to_dict(resource)
+
+    def get_resource_by_id(self, id):
+        with self.engine.session() as session, session.begin():
+            row = session.query(Resource).get(id)
+            return Persist._row_to_dict(row)
+
+    def get_tags_by_resource_id(self, id):
+        result = {}
+        with self.engine.session() as session, session.begin():
+            row = session.query(Resource).get(id)
+            for tag in row.tags:
+                result[tag.name] = Persist._row_to_dict(tag)
+        return result

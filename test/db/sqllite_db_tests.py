@@ -100,14 +100,14 @@ class TestEngineWithData(BaseSqlite):
         return Tag(
             name='person',
             engine='IMAGGA',
-            percent_match=45
+            confidence=45
         )
 
     def temp_resource_obj(self, temp_date_time):
         return Resource(
             name='smile.png',
             location='data/images/input/smile.png',
-            hash='3e44cfaa9a914f1312d157130810300f',
+            hashval='3e44cfaa9a914f1312d157130810300f',
             last_indexed=temp_date_time,
         )
 
@@ -124,7 +124,7 @@ class TestEngineWithData(BaseSqlite):
             person_tag = session.execute(select(Tag).filter_by(id=1)).scalar_one()
             self.assertEqual('person', person_tag.name)
             self.assertEqual('IMAGGA', person_tag.engine)
-            self.assertEqual(45, person_tag.percent_match)
+            self.assertEqual(45, person_tag.confidence)
 
     def test_resource(self):
         temp_date_time = datetime.datetime.now()
@@ -138,7 +138,7 @@ class TestEngineWithData(BaseSqlite):
             smile_resource = session.execute(select(Resource).filter_by(id=1)).scalar_one()
             self.assertEqual('smile.png', smile_resource.name)
             self.assertEqual('data/images/input/smile.png', smile_resource.location)
-            self.assertEqual('3e44cfaa9a914f1312d157130810300f', smile_resource.hash)
+            self.assertEqual('3e44cfaa9a914f1312d157130810300f', smile_resource.hashval)
             self.assertEqual(temp_date_time, smile_resource.last_indexed)
 
     def test_resource_tag(self):
@@ -156,4 +156,56 @@ class TestEngineWithData(BaseSqlite):
             new_tag = smile_resource.tags[0]
             self.assertEqual('person', new_tag.name)
             self.assertEqual('IMAGGA', new_tag.engine)
-            self.assertEqual(45, new_tag.percent_match)
+            self.assertEqual(45, new_tag.confidence)
+
+
+class TestPersist(BaseSqlite):
+    def setUp(self):
+        super().setUp()
+        self.e = Engine(DB_URL)
+        self.p = Persist(self.e)
+
+    def test_set_resource_minimum(self):
+        temp_date_time = datetime.datetime.now()
+        self.p.set_resource(
+            'smile.png',
+            'data/images/input/smile.png',
+            '3e44cfaa9a914f1312d157130810300f',
+            temp_date_time,
+        )
+
+        resource = self.p.get_resource_by_id(1)
+        self.assertEqual('smile.png', resource['name'])
+
+
+    def test_set_resource_with_tags(self):
+        temp_date_time = datetime.datetime.now()
+        tags = {
+            'smile': {
+                'confidence': 100
+            },
+            'face': {
+                'confidence': 95
+            },
+            'circle': {
+                'confidence': 25
+            }
+        }
+        self.p.set_resource(
+            'smile.png',
+            'data/images/input/smile.png',
+            '3e44cfaa9a914f1312d157130810300f',
+            temp_date_time,
+            engine='TESTENGINE',
+            tags=tags
+        )
+
+        tags = self.p.get_tags_by_resource_id(1)
+        self.assertEqual(3, len(tags))
+        self.assertEqual('smile', tags['smile']['name'])
+        self.assertEqual(100, tags['smile']['confidence'])
+        self.assertEqual('face', tags['face']['name'])
+        self.assertEqual(95, tags['face']['confidence'])
+        self.assertEqual('circle', tags['circle']['name'])
+        self.assertEqual(25, tags['circle']['confidence'])
+

@@ -22,9 +22,11 @@ def upgrade():
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('name', sa.String, nullable=False),
         sa.Column('location', sa.String, nullable=False),
-        sa.Column('hash', sa.String, nullable=False),
+        sa.Column('hashval', sa.String, nullable=False),
         sa.Column('last_indexed', sa.DateTime, nullable=False),
-        sa.Column('description', sa.String)
+        sa.Column('description', sa.String),
+        sa.UniqueConstraint('location', name='uix_1'),
+        sa.Index('idx_location', 'location', unique=True)
     )
 
 

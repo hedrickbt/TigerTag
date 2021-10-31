@@ -18,9 +18,10 @@ class Resource(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     location = Column(String, nullable=False)
-    hash = Column(String, nullable=False)
+    hashval = Column(String, nullable=False)
     last_indexed = Column(DateTime, nullable=False)
     description = Column(String)
+    __table_args__ = (UniqueConstraint('location', name='uix_1'),)  # _name_engine_uc
 
     tags = relationship(
         "Tag",
@@ -30,7 +31,8 @@ class Resource(Base):
 
     def __repr__(self):
         return f"Tag(id={self.id!r}, name={self.name!r}, location={self.location!r}, " \
-               f"hash={self.hash!r}, last_indexed={self.last_indexed!r}, description={self.description!r})"
+               f"hashval={self.hashval!r}, last_indexed={self.last_indexed!r}, " \
+               f"description={self.description!r})"
 
 
 class Tag(Base):
@@ -39,8 +41,8 @@ class Tag(Base):
     name = Column(String(100), nullable=False)
     engine = Column(String(100), nullable=False)
     description = Column(String)
-    percent_match = Column(Integer, nullable=False)
-    __table_args__ = (UniqueConstraint('name', 'engine', name='uix_1'),) # _name_engine_uc
+    confidence = Column(Integer, nullable=False)  # 0-100.  Percent likelihood the tag is correct
+    __table_args__ = (UniqueConstraint('name', 'engine', name='uix_1'),)  # _name_engine_uc
 
     resources = relationship(
         "Resource",
@@ -50,4 +52,4 @@ class Tag(Base):
 
     def __repr__(self):
         return f"Tag(id={self.id!r}, name={self.name!r}, description={self.description!r}, " \
-               f"percent_match={self.percent_match!r})"
+               f"confidence={self.confidence!r})"
