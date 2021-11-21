@@ -14,6 +14,7 @@ class Engine:
         self.name = name
         self.enabled = enabled
         self.props = {}
+        self.on_tags = None  # callback to receive tags for each resource as it is processed
 
     def run(self):
         raise NotImplementedError

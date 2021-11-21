@@ -70,17 +70,17 @@ class ImaggaEngine(Engine):
 
         return tagging_response.json()
 
-    def extract_colors(self, auth, image, upload_id=False):
-        colors_query = {
-            'image_upload_id' if upload_id else 'image_url': image,
-        }
-
-        colors_response = requests.get(
-            '%s/colors' % self.props['API_URL'],
-            auth=auth,
-            params=colors_query)
-
-        return colors_response.json()
+    # def extract_colors(self, auth, image, upload_id=False):
+    #     colors_query = {
+    #         'image_upload_id' if upload_id else 'image_url': image,
+    #     }
+    #
+    #     colors_response = requests.get(
+    #         '%s/colors' % self.props['API_URL'],
+    #         auth=auth,
+    #         params=colors_query)
+    #
+    #     return colors_response.json()
 
     def run(self):
         if 'API_KEY' not in self.props or 'API_SECRET' not in self.props:
@@ -92,8 +92,8 @@ class ImaggaEngine(Engine):
         tag_output = self.props['OUTPUT_LOCATION']
         language = 'en' if 'LANGUAGE' not in self.props else self.props['LANGUAGE']
         verbose = False if 'VERBOSE' not in self.props else str2bool(self.props['VERBOSE'])
-        merged_output = False if 'MERGED_OUTPUT' not in self.props else str2bool(self.props['MERGED_OUTPUT'])
-        include_colors = False if 'INCLUDE_COLORS' not in self.props else str2bool(self.props['INCLUDE_COLORS'])
+        # merged_output = False if 'MERGED_OUTPUT' not in self.props else str2bool(self.props['MERGED_OUTPUT'])
+        # include_colors = False if 'INCLUDE_COLORS' not in self.props else str2bool(self.props['INCLUDE_COLORS'])
 
         results = {}
         if os.path.isdir(tag_input):
@@ -117,16 +117,17 @@ class ImaggaEngine(Engine):
 
                 tag_result = self.tag_image(auth, upload_id, True, verbose, language)
 
-                if not include_colors:
-                    results[image_file] = tag_result
-                else:
-                    colors_result = self.extract_colors(auth, upload_id, True)
-                    results[image_file] = {
-                        'tagging': tag_result,
-                        'colors': colors_result
-                    }
-                print('[%s / %s] %s tagged' %
-                      (iterator + 1, images_count, image_path))
+                results[image_file] = tag_result
+                # if not include_colors:
+                #     results[image_file] = tag_result
+                # else:
+                #     colors_result = self.extract_colors(auth, upload_id, True)
+                #     results[image_file] = {
+                #         'tagging': tag_result,
+                #         'colors': colors_result
+                #     }
+                # print('[%s / %s] %s tagged' %
+                #       (iterator + 1, images_count, image_path))
         else:
             raise ArgumentException(
                 'The input directory does not exist: %s' % tag_input)
@@ -137,22 +138,31 @@ class ImaggaEngine(Engine):
             raise ArgumentException(
                 'The output folder must be a directory')
 
-        if merged_output:
-            with open(
-                    os.path.join(tag_output, 'results.json'),
-                    'wb') as results_file:
-                results_file.write(
-                    json.dumps(
-                        results, ensure_ascii=False, indent=4).encode('utf-8'))
-        else:
-            for image, result in results.items():
-                with open(
-                        os.path.join(tag_output, 'result_%s.json' % image),
-                        'wb') as results_file:
-                    results_file.write(
-                        json.dumps(
-                            result, ensure_ascii=False, indent=4).encode('utf-8'))
+        # if merged_output:
+        #     with open(
+        #             os.path.join(tag_output, 'results.json'),
+        #             'wb') as results_file:
+        #         results_file.write(
+        #             json.dumps(
+        #                 results, ensure_ascii=False, indent=4).encode('utf-8'))
+        # else:
+        #     for image, result in results.items():
+        #         with open(
+        #                 os.path.join(tag_output, 'result_%s.json' % image),
+        #                 'wb') as results_file:
+        #             results_file.write(
+        #                 json.dumps(
+        #                     result, ensure_ascii=False, indent=4).encode('utf-8'))
 
+        for image, result in results.items():
+            with open(
+                    os.path.join(tag_output, 'result_%s.json' % image),
+                    'wb') as results_file:
+                result_json = json.dumps(
+                        result, ensure_ascii=False, indent=4).encode('utf-8')
+                results_file.write(result_json)
+                if self.on_tags is not None:
+                    self.on_tags(image, result_json)
         print('Done')
 
 
@@ -186,17 +196,17 @@ def parse_arguments():
         default=False,
         help='Whether to use verbose mode')
 
-    parser.add_argument(
-        '--merged-output',
-        type=lambda x: bool(str2bool(x)),
-        default=False,
-        help='Whether to generate a single output file')
+    # parser.add_argument(
+    #     '--merged-output',
+    #     type=lambda x: bool(str2bool(x)),
+    #     default=False,
+    #     help='Whether to generate a single output file')
 
-    parser.add_argument(
-        '--include-colors',
-        type=lambda x: bool(str2bool(x)),
-        default=False,
-        help='Whether to do color extraction on the images too')
+    # parser.add_argument(
+    #     '--include-colors',
+    #     type=lambda x: bool(str2bool(x)),
+    #     default=False,
+    #     help='Whether to do color extraction on the images too')
 
     args = parser.parse_args()
     return args
@@ -217,8 +227,8 @@ def main():
     en.props['OUTPUT_LOCATION'] = args.output[0]
     en.props['LANGUAGE'] = str(args.language)
     en.props['VERBOSE'] = str(args.verbose)
-    en.props['MERGED_OUTPUT'] = str(args.merged_output)
-    en.props['INCLUDE_COLORS'] = str(args.include_colors)
+    # en.props['MERGED_OUTPUT'] = str(args.merged_output)
+    # en.props['INCLUDE_COLORS'] = str(args.include_colors)
 
     print('Tagging images started')
     en.run()
