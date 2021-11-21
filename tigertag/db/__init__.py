@@ -71,11 +71,16 @@ class Persist:
                     tag = Tag(
                         name=tag_name,
                         engine=engine,
+                    )
+                    resource_tag = ResourceTag(
+                        resource=resource,
+                        tag=tag,
                         confidence=tag_values['confidence'],
                     )
                     session.add(tag)
-                    temp_resource_tags.append(tag)
-                resource.tags = temp_resource_tags
+                    session.add(resource_tag)
+                #     temp_resource_tags.append(tag)
+                # resource.tags = temp_resource_tags
             else:
                 raise ValueError('While trying to set a resource, the tags were None.')
         else:
@@ -114,6 +119,8 @@ class Persist:
         result = {}
         with self.engine.session() as session, session.begin():
             row = session.query(Resource).get(id)
-            for tag in row.tags:
-                result[tag.name] = Persist._row_to_dict(tag)
+            for resource_tag in row.tags:
+                tag_detail = Persist._row_to_dict(resource_tag.tag)
+                tag_detail['confidence'] = resource_tag.confidence
+                result[resource_tag.tag.name] = tag_detail
         return result

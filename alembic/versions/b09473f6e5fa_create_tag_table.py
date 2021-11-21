@@ -23,7 +23,6 @@ def upgrade():
         sa.Column('name', sa.String(100), nullable=False),
         sa.Column('engine', sa.String(100), nullable=False),
         sa.Column('description', sa.String),
-        sa.Column('confidence', sa.Integer, nullable=False),
         sa.UniqueConstraint('name', 'engine', name='uix_1'),
         sa.Index('idx_name', 'name', unique=True)
 

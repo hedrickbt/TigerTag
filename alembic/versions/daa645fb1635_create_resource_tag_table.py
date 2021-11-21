@@ -21,6 +21,7 @@ def upgrade():
         'resource_tag',
         sa.Column('resource_id', sa.Integer, primary_key=True),
         sa.Column('tag_id', sa.Integer, primary_key=True),
+        sa.Column('confidence', sa.Integer, nullable=False),
         sa.ForeignKeyConstraint(('resource_id',), ['resource.id']),
         sa.ForeignKeyConstraint(('tag_id',), ['tag.id']),
     )

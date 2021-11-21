@@ -100,7 +100,6 @@ class TestEngineWithData(BaseSqlite):
         return Tag(
             name='person',
             engine='IMAGGA',
-            confidence=45
         )
 
     def temp_resource_obj(self, temp_date_time):
@@ -110,6 +109,18 @@ class TestEngineWithData(BaseSqlite):
             hashval='3e44cfaa9a914f1312d157130810300f',
             last_indexed=temp_date_time,
         )
+
+    def temp_resource_tag_obj(self, temp_date_time):
+        temp_resource = self.temp_resource_obj(temp_date_time)
+        temp_tag = self.temp_tag_obj()
+
+        return temp_resource, \
+            temp_tag, \
+            ResourceTag(
+                confidence=45,
+                resource=temp_resource,
+                tag=temp_tag,
+            )
 
     def test_tag(self):
         person_tag = self.temp_tag_obj()
@@ -124,7 +135,6 @@ class TestEngineWithData(BaseSqlite):
             person_tag = session.execute(select(Tag).filter_by(id=1)).scalar_one()
             self.assertEqual('person', person_tag.name)
             self.assertEqual('IMAGGA', person_tag.engine)
-            self.assertEqual(45, person_tag.confidence)
 
     def test_resource(self):
         temp_date_time = datetime.datetime.now()
@@ -143,20 +153,19 @@ class TestEngineWithData(BaseSqlite):
 
     def test_resource_tag(self):
         # HELPFUL https://programmer.help/blogs/sqlalchemy-many-to-many-relationship.html
-        person_tag = self.temp_tag_obj()
         temp_date_time = datetime.datetime.now()
-        smile_resource = self.temp_resource_obj(temp_date_time)
+        temp_resource, temp_tag, temp_resource_tag = self.temp_resource_tag_obj(temp_date_time)
         with self.e.session() as session, session.begin():
-            session.add(person_tag)
-            smile_resource.tags = [person_tag]
-            session.add(smile_resource)
+            session.add(temp_tag)
+            session.add(temp_resource)
+            session.add(temp_resource_tag)
 
         with self.e.session() as session, session.begin():
             smile_resource = session.execute(select(Resource).filter_by(id=1)).scalar_one()
-            new_tag = smile_resource.tags[0]
-            self.assertEqual('person', new_tag.name)
-            self.assertEqual('IMAGGA', new_tag.engine)
-            self.assertEqual(45, new_tag.confidence)
+            new_resource_tag = smile_resource.tags[0]
+            self.assertEqual('person', new_resource_tag.tag.name)
+            self.assertEqual('IMAGGA', new_resource_tag.tag.engine)
+            self.assertEqual(45, new_resource_tag.confidence)
 
 
 class TestPersist(BaseSqlite):

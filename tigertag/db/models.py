@@ -5,12 +5,23 @@ from sqlalchemy import Table, Column, Integer, String, DateTime
 
 Base = declarative_base()
 
-resource_tag_table = Table(
-    'resource_tag',
-    Base.metadata,
-    Column('resource_id', ForeignKey('resource.id'), primary_key=True),
-    Column('tag_id', ForeignKey('tag.id'), primary_key=True)
-)
+# resource_tag_table = Table(
+#     'resource_tag',
+#     Base.metadata,
+#     Column('id', Integer, primary_key=True),
+#     Column('confidence', Integer, nullable=False),  # 0-100.  Percent likelihood the tag is correct
+#     Column('resource_id', ForeignKey('resource.id'), primary_key=True),
+#     Column('tag_id', ForeignKey('tag.id'), primary_key=True),
+# )
+
+
+class ResourceTag(Base):
+    __tablename__ = 'resource_tag'
+    resource_id = Column(ForeignKey('resource.id'), primary_key=True)
+    tag_id = Column(ForeignKey('tag.id'), primary_key=True)
+    confidence = Column(Integer, nullable=False)  # 0-100.  Percent likelihood the tag is correct
+    resource = relationship('Resource', back_populates='tags')
+    tag = relationship('Tag', back_populates='resources')
 
 
 class Resource(Base):
@@ -21,12 +32,11 @@ class Resource(Base):
     hashval = Column(String, nullable=False)
     last_indexed = Column(DateTime, nullable=False)
     description = Column(String)
-    __table_args__ = (UniqueConstraint('location', name='uix_1'),)  # _name_engine_uc
+    __table_args__ = (UniqueConstraint('location', name='uix_1'),)  # _location _uc
 
     tags = relationship(
-        "Tag",
-        secondary=resource_tag_table,
-        back_populates="resources"
+        "ResourceTag",
+        back_populates="resource"
     )
 
     def __repr__(self):
@@ -41,13 +51,11 @@ class Tag(Base):
     name = Column(String(100), nullable=False)
     engine = Column(String(100), nullable=False)
     description = Column(String)
-    confidence = Column(Integer, nullable=False)  # 0-100.  Percent likelihood the tag is correct
     __table_args__ = (UniqueConstraint('name', 'engine', name='uix_1'),)  # _name_engine_uc
 
     resources = relationship(
-        "Resource",
-        secondary=resource_tag_table,
-        back_populates="tags"
+        "ResourceTag",
+        back_populates="tag"
     )
 
     def __repr__(self):
