@@ -19,6 +19,7 @@ class TestEngineManager(unittest.TestCase):
     def setUp(self):
         self.em = EngineManager()
         self.e = Engine('test_engine_2', True)
+        self.e.prefix = 'ttt'
         self.em.add(self.e)
 
     def test_engine_exists(self):
@@ -27,8 +28,32 @@ class TestEngineManager(unittest.TestCase):
         self.assertEqual(self.e, self.em.engines['test_engine_2'])
 
     def test_run_not_implemented(self):
-        self.assertRaises(NotImplementedError, self.em.run)
+        self.assertRaisesRegex(
+            NotImplementedError,
+            'The {} engine has not implemented the run method.'.format(self.e.name),
+            self.em.run)
 
+    def _run_stub(self):
+        return False
+
+    def test_duplicate_prefix(self):
+        self.e.run = self._run_stub
+        self.e3 = Engine('test_engine_3', True)
+        self.e3.run = self._run_stub
+        self.e3.prefix = 'ttt'
+        self.em.add(self.e3)
+        self.assertRaisesRegex(
+            ValueError,
+            'Duplicate prefix {} found in {} engine.  Removing the engine or changing the prefix '
+            'will resolve the issue.'.format(self.e3.prefix, self.e3.name),
+            self.em.run)
+
+    def test_missing_prefix(self):
+        self.e.prefix = None
+        self.assertRaisesRegex(
+            AttributeError,
+            'The {} engine is missing the prefix attribute'.format(self.e.name),
+            self.em.run)
 
 class TestEnvironmentEngineManagerBuilder(unittest.TestCase):
     def setUp(self):
@@ -45,4 +70,5 @@ class TestEnvironmentEngineManagerBuilder(unittest.TestCase):
 
     def test_run_not_implemented(self):
         em = self.emb.build()
+        em.engines['TEST'].prefix = 'ttt'
         self.assertRaises(NotImplementedError, em.run)

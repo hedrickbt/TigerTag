@@ -21,6 +21,7 @@ class ImaggaEngine(Engine):
 
     def __init__(self, name, enabled):
         super().__init__(name, enabled)
+        self.prefix = 'tti'
 
     def upload_image(self, auth, image_path):
         if not os.path.isfile(image_path):

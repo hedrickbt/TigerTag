@@ -14,10 +14,11 @@ class Engine:
         self.name = name
         self.enabled = enabled
         self.props = {}
+        self.prefix = None
         self.on_tags = None  # callback to receive tags for each resource as it is processed
 
     def run(self):
-        raise NotImplementedError
+        raise NotImplementedError('The {} engine has not implemented the run method.'.format(self.name))
 
 
 class EngineManager:
@@ -28,9 +29,16 @@ class EngineManager:
         self.engines[engine.name] = engine
 
     def run(self):
+        prefixes = []
         for engine_name, engine in self.engines.items():
+            if engine.prefix is None:
+                raise AttributeError('The {} engine is missing the prefix attribute.'.format(engine_name))
+            if engine.prefix in prefixes:
+                raise ValueError('Duplicate prefix {} found in {} engine.  Removing the engine or changing the '
+                                 'prefix will resolve the issue.'.format(engine.prefix, engine_name))
             if engine.enabled:
                 engine.run()
+                prefixes.append(engine.prefix)
 
 
 class EngineManagerBuilder:
