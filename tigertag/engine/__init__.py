@@ -14,7 +14,7 @@ class Engine:
         self.name = name
         self.enabled = enabled
         self.props = {}
-        self.prefix = None
+        self.prefix = None  # required
         self.on_tags = None  # callback to receive tags for each resource as it is processed
 
     def run(self):

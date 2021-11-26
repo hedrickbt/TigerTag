@@ -4,11 +4,11 @@ from tigertag.engine.imagga import *
 
 
 class TestImaggaEngine(unittest.TestCase):
-    def on_tags(self, image_file_name, json_data):
-        self.found_tags[image_file_name] = json_data
+    def on_tags(self, tag_info):
+        self.found_tags.append(tag_info)
 
     def setUp(self):
-        self.found_tags = {}
+        self.found_tags = []
         self.e = ImaggaEngine('imagga_engine', True)
         self.e.props['API_KEY'] = os.environ['IMAGGA_API_KEY']  # EX: acc_9...
         self.e.props['API_SECRET'] = os.environ['IMAGGA_API_SECRET']  # EX: 3e0b5...

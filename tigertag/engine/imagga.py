@@ -118,7 +118,27 @@ class ImaggaEngine(Engine):
 
                 tag_result = self.tag_image(auth, upload_id, True, verbose, language)
 
-                results[image_file] = tag_result
+                # Long term this needs to go unless there is some sort of setting to write the files
+                with open(
+                        os.path.join(tag_output, 'result_%s.json' % image_file),
+                        'wb') as results_file:
+                    result_json = json.dumps(
+                        tag_result, ensure_ascii=False, indent=4).encode('utf-8')
+                    results_file.write(result_json)
+
+                if self.on_tags is not None:
+                    tag_resonse = {
+                        'file_path': image_path,
+                        'file_hash': '',
+                        'tags': {},
+                    }
+                    for tag_item in tag_result['result']['tags']:
+                        tag_resonse['tags'][tag_item['tag']['en']] = {
+                            'confidence': tag_item['confidence']
+                        }
+                    self.on_tags(tag_resonse)
+
+                # results[image_file] = tag_result
                 # if not include_colors:
                 #     results[image_file] = tag_result
                 # else:
@@ -155,15 +175,6 @@ class ImaggaEngine(Engine):
         #                 json.dumps(
         #                     result, ensure_ascii=False, indent=4).encode('utf-8'))
 
-        for image, result in results.items():
-            with open(
-                    os.path.join(tag_output, 'result_%s.json' % image),
-                    'wb') as results_file:
-                result_json = json.dumps(
-                        result, ensure_ascii=False, indent=4).encode('utf-8')
-                results_file.write(result_json)
-                if self.on_tags is not None:
-                    self.on_tags(image, result_json)
         print('Done')
 
 
