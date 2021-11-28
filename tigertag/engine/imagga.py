@@ -7,6 +7,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from tigertag.engine import Engine
+from tigertag.util import calc_hash
 from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
@@ -127,15 +128,17 @@ class ImaggaEngine(Engine):
                     results_file.write(result_json)
 
                 if self.on_tags is not None:
+                    file_hash = calc_hash(image_path)
                     tag_resonse = {
                         'file_path': image_path,
-                        'file_hash': '',
+                        'file_hash': file_hash,
                         'tags': {},
                     }
-                    for tag_item in tag_result['result']['tags']:
-                        tag_resonse['tags'][tag_item['tag']['en']] = {
-                            'confidence': tag_item['confidence']
-                        }
+                    if 'result' in tag_result and 'tags' in tag_result['result']:
+                        for tag_item in tag_result['result']['tags']:
+                            tag_resonse['tags'][tag_item['tag']['en']] = {
+                                'confidence': tag_item['confidence']
+                            }
                     self.on_tags(tag_resonse)
 
                 # results[image_file] = tag_result
