@@ -3,7 +3,7 @@ import tempfile
 import unittest
 
 from tigertag.util import str2bool
-from tigertag.util import calc_digest
+from tigertag.util import calc_hash
 
 
 class TestStr2Bool(unittest.TestCase):
@@ -39,8 +39,8 @@ class TestStr2Bool(unittest.TestCase):
         with open(self.file_path, 'w') as file:
             file.write('Test file!!')
 
-    def test_calc_digest(self):
-        hash_result = calc_digest(self.file_path)
+    def test_calc_hash(self):
+        hash_result = calc_hash(self.file_path)
         self.assertEqual('3195ef5da827122ffaadaab5c7c2f396f0245ad06a741fa9e966957284130f61', hash_result)
 
     def tearDown(self):

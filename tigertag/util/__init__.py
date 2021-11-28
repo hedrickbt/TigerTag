@@ -5,7 +5,7 @@ def str2bool(v):
     return str(v).lower() in ("yes", "true", "t", "1")
 
 
-def calc_digest(file_path):
+def calc_hash(file_path):
     h = hashlib.sha256()
     with open(file_path, 'rb') as file:
         while True:
