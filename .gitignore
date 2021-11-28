@@ -3,5 +3,6 @@ venv
 settings.yaml
 tigertag.db
 test/db/tigertag_demo.db
+test/data/images/output
 .idea
 *.pyc

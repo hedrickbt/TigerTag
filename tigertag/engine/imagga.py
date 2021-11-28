@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 import os
+import time
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -20,40 +21,48 @@ class ArgumentException(Exception):
 class ImaggaEngine(Engine):
     FILE_TYPES = ['png', 'jpg', 'jpeg', 'gif']
 
-    def __init__(self, name, enabled):
+    def __init__(self, name, enabled, tries=5):
         super().__init__(name, enabled)
         self.prefix = 'tti'
+        self.tries = tries
 
     def upload_image(self, auth, image_path):
+        upload_id = None
         if not os.path.isfile(image_path):
             raise ArgumentException('Invalid image path')
 
         # Open the desired file
         with open(image_path, 'rb') as image_file:
-            # filename = image_file.name
+            current_try = 1
+            success = False
+            while not success and current_try <= self.tries:
+                content_response = requests.post(
+                    '%s/uploads' % self.props['API_URL'],
+                    auth=auth,
+                    files={'image': image_file})
 
-            # Upload the multipart-encoded image with a POST
-            # request to the /uploads endpoint
-            content_response = requests.post(
-                '%s/uploads' % self.props['API_URL'],
-                auth=auth,
-                files={'image': image_file})
+                # Example /uploads response:
+                #    {
+                #      "result": {
+                #        "upload_id": "i05e132196706b94b1d85efb5f3SaM1j"
+                #      },
+                #      "status": {
+                #        "text": "",
+                #        "type": "success"
+                #      }
+                #    }
+                if 'result' not in content_response.json():
+                    if current_try > self.tries:
+                        raise KeyError('result not found in {}'.format(content_response))
+                    else:
+                        time.sleep(current_try)
+                        current_try = current_try + 1
+                else:
+                    success = True
+                    uploaded_file = content_response.json()['result']
 
-            # Example /uploads response:
-            #    {
-            #      "result": {
-            #        "upload_id": "i05e132196706b94b1d85efb5f3SaM1j"
-            #      },
-            #      "status": {
-            #        "text": "",
-            #        "type": "success"
-            #      }
-            #    }
-            uploaded_file = content_response.json()['result']
-
-            # Get the upload id of the uploaded file
-            upload_id = uploaded_file['upload_id']
-
+                    # Get the upload id of the uploaded file
+                    upload_id = uploaded_file['upload_id']
         return upload_id
 
     def tag_image(self, auth, image, upload_id=False, verbose=False, language='en'):
