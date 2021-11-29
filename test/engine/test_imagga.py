@@ -4,7 +4,7 @@ from tigertag.engine.imagga import *
 
 
 class TestImaggaEngine(unittest.TestCase):
-    def on_tags(self, tag_info):
+    def on_tags(self, engine, tag_info):
         self.found_tags[tag_info['file_path']] = tag_info
 
     def setUp(self):

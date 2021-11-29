@@ -24,6 +24,7 @@ class Engine:
 class EngineManager:
     def __init__(self):
         self.engines = {}
+        self.on_tags = None # callback to receive tags for each engine as it is processed
 
     def add(self, engine):
         self.engines[engine.name] = engine
@@ -37,6 +38,8 @@ class EngineManager:
                 raise ValueError('Duplicate prefix {} found in {} engine.  Removing the engine or changing the '
                                  'prefix will resolve the issue.'.format(engine.prefix, engine_name))
             if engine.enabled:
+                if self.on_tags is not None:
+                    engine.on_tags = self.on_tags
                 engine.run()
                 prefixes.append(engine.prefix)
 

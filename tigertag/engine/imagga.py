@@ -152,7 +152,7 @@ class ImaggaEngine(Engine):
                             tag_resonse['tags'][new_tag] = {
                                 'confidence': tag_item['confidence']
                             }
-                    self.on_tags(tag_resonse)
+                    self.on_tags(self, tag_resonse)
 
                 # results[image_file] = tag_result
                 # if not include_colors:
