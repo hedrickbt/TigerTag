@@ -55,7 +55,7 @@ class ImaggaEngine(Engine):
                     if current_try > self.tries:
                         raise KeyError('result not found in {}'.format(content_response))
                     else:
-                        time.sleep(current_try)
+                        time.sleep(current_try * 2)
                         current_try = current_try + 1
                 else:
                     success = True
@@ -92,6 +92,9 @@ class ImaggaEngine(Engine):
     #         params=colors_query)
     #
     #     return colors_response.json()
+
+    def calc_tag_name(self, tag_name):
+        return '{}_{}'.format(self.prefix, tag_name)
 
     def run(self):
         if 'API_KEY' not in self.props or 'API_SECRET' not in self.props:
@@ -145,7 +148,8 @@ class ImaggaEngine(Engine):
                     }
                     if 'result' in tag_result and 'tags' in tag_result['result']:
                         for tag_item in tag_result['result']['tags']:
-                            tag_resonse['tags'][tag_item['tag']['en']] = {
+                            new_tag = self.calc_tag_name(tag_item['tag']['en'])
+                            tag_resonse['tags'][new_tag] = {
                                 'confidence': tag_item['confidence']
                             }
                     self.on_tags(tag_resonse)
