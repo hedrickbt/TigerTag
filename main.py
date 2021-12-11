@@ -1,5 +1,6 @@
 from tigertag.engine import EnvironmentEngineManagerBuilder
 from tigertag.engine import EngineManager
+from tigertag.engine import EngineListener
 
 # ENGINE_IMAGGA_NAME=tigertag.engine.imagga.ImaggaEngine
 # ENGINE_IMAGGA_ENABLED=True
@@ -18,8 +19,10 @@ def on_tags(engine, tag_info):
     FOUND_TAGS[tag_info['file_path']] = tag_info
 
 if __name__ == "__main__":
+    el = EngineListener()
+    el.on_tags = on_tags
     emb = EnvironmentEngineManagerBuilder(EngineManager)
     em = emb.build()
-    em.on_tags = on_tags
+    em.listeners.append(el)
     em.run()
     print(FOUND_TAGS)

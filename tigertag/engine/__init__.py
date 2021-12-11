@@ -7,6 +7,11 @@ from tigertag.util import str2bool
 logger = logging.getLogger(__name__)
 
 
+class EngineListener:
+    def on_tags(self, engine, tag_info):
+        pass
+
+
 class Engine:
     RESERVED_PROPS = ['NAME', 'ENABLED']
 
@@ -15,7 +20,7 @@ class Engine:
         self.enabled = enabled
         self.props = {}
         self.prefix = None  # required
-        self.on_tags = None  # callback to receive tags for each resource as it is processed
+        self.listeners = []  # EngineListeners
 
     def run(self):
         raise NotImplementedError('The {} engine has not implemented the run method.'.format(self.name))
@@ -24,7 +29,7 @@ class Engine:
 class EngineManager:
     def __init__(self):
         self.engines = {}
-        self.on_tags = None # callback to receive tags for each engine as it is processed
+        self.listeners = [] # EngineListener array
 
     def add(self, engine):
         self.engines[engine.name] = engine
@@ -38,8 +43,8 @@ class EngineManager:
                 raise ValueError('Duplicate prefix {} found in {} engine.  Removing the engine or changing the '
                                  'prefix will resolve the issue.'.format(engine.prefix, engine_name))
             if engine.enabled:
-                if self.on_tags is not None:
-                    engine.on_tags = self.on_tags
+                for engine_listener in self.listeners:
+                    engine.listeners.append(engine_listener)
                 engine.run()
                 prefixes.append(engine.prefix)
 

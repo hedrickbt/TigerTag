@@ -139,7 +139,7 @@ class ImaggaEngine(Engine):
                         tag_result, ensure_ascii=False, indent=4).encode('utf-8')
                     results_file.write(result_json)
 
-                if self.on_tags is not None:
+                if len(self.listeners) > 0:
                     file_hash = calc_hash(image_path)
                     tag_resonse = {
                         'file_path': image_path,
@@ -152,7 +152,8 @@ class ImaggaEngine(Engine):
                             tag_resonse['tags'][new_tag] = {
                                 'confidence': tag_item['confidence']
                             }
-                    self.on_tags(self, tag_resonse)
+                    for listener in self.listeners:
+                        listener.on_tags(self, tag_resonse)
 
                 # results[image_file] = tag_result
                 # if not include_colors:

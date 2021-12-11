@@ -1,5 +1,6 @@
 import unittest
 
+from tigertag.engine import *
 from tigertag.engine.imagga import *
 
 
@@ -8,8 +9,8 @@ class TestImaggaEngine(unittest.TestCase):
         self.found_tags[tag_info['file_path']] = tag_info
 
     def setUp(self):
-        input_path = os.path.realpath(os.path.join(os.getcwd(), 'data', 'images', 'input'))
-        output_path = os.path.realpath(os.path.join(os.getcwd(), 'data', 'images', 'output'))
+        input_path = os.path.normpath(os.path.join(os.getcwd(), 'data', 'images', 'input'))
+        output_path = os.path.normpath(os.path.join(os.getcwd(), 'data', 'images', 'output'))
         self.found_tags = {}
         self.e = ImaggaEngine('imagga_engine', True)
         self.e.props['API_KEY'] = os.environ['IMAGGA_API_KEY']  # EX: acc_9...
@@ -17,11 +18,13 @@ class TestImaggaEngine(unittest.TestCase):
         self.e.props['API_URL'] = 'https://api.imagga.com/v2'
         self.e.props['INPUT_LOCATION'] = input_path
         self.e.props['OUTPUT_LOCATION'] = output_path
-        self.e.on_tags = self.on_tags
+        el = EngineListener()
+        el.on_tags = self.on_tags
+        self.e.listeners.append(el)
 
     def test_run(self):
         self.e.run()
-        input_file_path = os.path.realpath(
+        input_file_path = os.path.normpath(
             os.path.join(os.getcwd(), 'data', 'images', 'input', 'boy.jpg'))
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
@@ -33,7 +36,7 @@ class TestImaggaEngine(unittest.TestCase):
         self.assertGreater(50, tagged_item['tags'][tag_name]['confidence'])
         self.assertLess(40, tagged_item['tags'][tag_name]['confidence'])
 
-        input_file_path = os.path.realpath(
+        input_file_path = os.path.normpath(
             os.path.join(os.getcwd(), 'data', 'images', 'input', 'girl.jpg'))
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
@@ -45,7 +48,7 @@ class TestImaggaEngine(unittest.TestCase):
         self.assertGreater(80, tagged_item['tags'][tag_name]['confidence'])
         self.assertLess(70, tagged_item['tags'][tag_name]['confidence'])
 
-        input_file_path = os.path.realpath(
+        input_file_path = os.path.normpath(
             os.path.join(os.getcwd(), 'data', 'images', 'input', 'puppy.jpg'))
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
@@ -55,7 +58,7 @@ class TestImaggaEngine(unittest.TestCase):
         self.assertIn(tag_name, tagged_item['tags'])
         self.assertEqual(100, tagged_item['tags'][tag_name]['confidence'])
 
-        input_file_path = os.path.realpath(os.path.join(os.getcwd(), 'data', 'images', 'input', 'sunflower.jpg'))
+        input_file_path = os.path.normpath(os.path.join(os.getcwd(), 'data', 'images', 'input', 'sunflower.jpg'))
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
         self.assertEqual('7bbafa42a91fba3eea845133afa79f7e665c80ffc1d8e2ca53be25120c4cfe66',

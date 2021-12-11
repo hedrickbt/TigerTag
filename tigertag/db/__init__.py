@@ -63,7 +63,8 @@ class Persist:
             #     d[column.name] = str(getattr(row, column.name))
         return d
 
-    def _handle_tags(self, session, resource, engine, tags):
+    @staticmethod
+    def _handle_tags(session, resource, engine, tags):
         if engine is not None:
             if tags is not None:
                 temp_resource_tags = []
@@ -106,7 +107,7 @@ class Persist:
                 resource.description = description
             if new_record:
                 session.add(resource)
-            self._handle_tags(session, resource, engine, tags)
+            Persist._handle_tags(session, resource, engine, tags)
 
             return Persist._row_to_dict(resource)
 
