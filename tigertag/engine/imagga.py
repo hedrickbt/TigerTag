@@ -134,7 +134,6 @@ class ImaggaEngine(Engine):
                 'The input directory does not exist: %s' % tag_input)
 
 
-
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description='Tags images in a folder')
