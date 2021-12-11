@@ -22,8 +22,8 @@ class Engine:
         self.prefix = None  # required
         self.listeners = []  # EngineListeners
 
-    def run(self):
-        raise NotImplementedError('The {} engine has not implemented the run method.'.format(self.name))
+    def tag(self, path):
+        raise NotImplementedError('The {} engine has not implemented the tag method.'.format(self.name))
 
 
 class EngineManager:
@@ -34,7 +34,7 @@ class EngineManager:
     def add(self, engine):
         self.engines[engine.name] = engine
 
-    def run(self):
+    def tag(self, path):
         prefixes = []
         for engine_name, engine in self.engines.items():
             if engine.prefix is None:
@@ -45,7 +45,7 @@ class EngineManager:
             if engine.enabled:
                 for engine_listener in self.listeners:
                     engine.listeners.append(engine_listener)
-                engine.run()
+                engine.tag(path)
                 prefixes.append(engine.prefix)
 
 

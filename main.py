@@ -7,7 +7,6 @@ from tigertag.engine import EngineListener
 # ENGINE_IMAGGA_API_KEY=<VALUE>
 # ENGINE_IMAGGA_API_SECRET=<VALUE>
 # ENGINE_IMAGGA_API_URL=https://api.imagga.com/v2
-# ENGINE_IMAGGA_INPUT_LOCATION=data/images/input
 # DB_URL=sqlite:///tigertag.db
 
 FOUND_TAGS = {}

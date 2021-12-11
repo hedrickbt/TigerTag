@@ -8,6 +8,8 @@ from http.client import HTTPConnection  # py3
 import requests
 from requests.auth import HTTPBasicAuth
 
+from tigertag.scanner.directory import DirectoryScanner
+from tigertag.scanner import ScannerListener
 from tigertag.engine import Engine
 from tigertag.engine import EngineListener
 from tigertag.util import calc_hash
@@ -112,29 +114,9 @@ class ImaggaEngine(Engine):
                 tag_resonse['tags'][new_tag] = {
                     'confidence': tag_item['confidence']
                 }
+        for listener in self.listeners:
+            listener.on_tags(self, tag_resonse)
         return tag_resonse
-
-    def run(self):
-        if 'API_KEY' not in self.props or 'API_SECRET' not in self.props:
-            raise ArgumentException('You haven\'t set your API credentials.')
-
-        tag_input = self.props['INPUT_LOCATION']
-        if os.path.isdir(tag_input):
-            images = [filename for filename in os.listdir(tag_input)
-                      if os.path.isfile(os.path.join(tag_input, filename)) and
-                      filename.split('.')[-1].lower() in ImaggaEngine.FILE_TYPES]
-
-            images_count = len(images)
-            for iterator, image_file in enumerate(images):
-                image_path = os.path.join(tag_input, image_file)
-                logging.info('[%s / %s] %s uploading' %
-                             (iterator + 1, images_count, image_path))
-                tag_result = self.tag(image_path)
-                for listener in self.listeners:
-                    listener.on_tags(self, tag_result)
-        else:
-            raise ArgumentException(
-                'The input directory does not exist: %s' % tag_input)
 
 
 def parse_arguments():
@@ -181,14 +163,20 @@ def main():
     en.props['API_KEY'] = api_key
     en.props['API_SECRET'] = api_secret
     en.props['API_URL'] = api_url
-    en.props['INPUT_LOCATION'] = args.input[0]
     en.props['LANGUAGE'] = str(args.language)
     en.props['VERBOSE'] = str(args.verbose)
+
     el = EngineListener()
     el.on_tags = lambda engine, tag_info: print('{}: {}'.format(tag_info['file_path'], tag_info))
     en.listeners.append(el)
+
+    s = DirectoryScanner('directory_scanner', True, args.input[0])
+    sl = ScannerListener()
+    sl.on_file = lambda scanner, file_info: en.tag(file_info['file_path'])
+    s.listeners.append(sl)
+
     logging.info('Tagging images started')
-    en.run()
+    s.scan()
     logging.info('Tagging images complete')
 
 

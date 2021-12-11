@@ -11,8 +11,8 @@ class TestEngine(unittest.TestCase):
         self.assertEqual(self.e.name, 'test_engine')
         self.assertEqual(self.e.enabled, False)
 
-    def test_run_not_implemented(self):
-        self.assertRaises(NotImplementedError, self.e.run)
+    def test_tag_not_implemented(self):
+        self.assertRaises(NotImplementedError, self.e.tag, 'Not needed')
 
 
 class TestEngineManager(unittest.TestCase):
@@ -27,33 +27,33 @@ class TestEngineManager(unittest.TestCase):
         self.assertIn('test_engine_2', self.em.engines)
         self.assertEqual(self.e, self.em.engines['test_engine_2'])
 
-    def test_run_not_implemented(self):
+    def test_tag_not_implemented(self):
         self.assertRaisesRegex(
             NotImplementedError,
-            'The {} engine has not implemented the run method.'.format(self.e.name),
-            self.em.run)
+            'The {} engine has not implemented the tag method.'.format(self.e.name),
+            self.em.tag, 'Not needed')
 
-    def _run_stub(self):
-        return False
+    def _tag_stub(self, path):
+        pass
 
     def test_duplicate_prefix(self):
-        self.e.run = self._run_stub
+        self.e.tag = self._tag_stub
         self.e3 = Engine('test_engine_3', True)
-        self.e3.run = self._run_stub
+        self.e3.tag = self._tag_stub
         self.e3.prefix = 'ttt'
         self.em.add(self.e3)
         self.assertRaisesRegex(
             ValueError,
             'Duplicate prefix {} found in {} engine.  Removing the engine or changing the prefix '
             'will resolve the issue.'.format(self.e3.prefix, self.e3.name),
-            self.em.run)
+            self.em.tag, 'Not Needed')
 
     def test_missing_prefix(self):
         self.e.prefix = None
         self.assertRaisesRegex(
             AttributeError,
             'The {} engine is missing the prefix attribute'.format(self.e.name),
-            self.em.run)
+            self.em.tag, 'Not needed')
 
 class TestEnvironmentEngineManagerBuilder(unittest.TestCase):
     def setUp(self):
@@ -68,7 +68,7 @@ class TestEnvironmentEngineManagerBuilder(unittest.TestCase):
         self.assertIn('SPECIAL_PROPERTY', em.engines['TEST'].props)
         self.assertEqual('MySpecialPropertyValue', em.engines['TEST'].props['SPECIAL_PROPERTY'])
 
-    def test_run_not_implemented(self):
+    def test_tag_not_implemented(self):
         em = self.emb.build()
         em.engines['TEST'].prefix = 'ttt'
-        self.assertRaises(NotImplementedError, em.run)
+        self.assertRaises(NotImplementedError, em.tag, 'Not needed')

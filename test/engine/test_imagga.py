@@ -16,15 +16,14 @@ class TestImaggaEngine(unittest.TestCase):
         self.e.props['API_KEY'] = os.environ['IMAGGA_API_KEY']  # EX: acc_9...
         self.e.props['API_SECRET'] = os.environ['IMAGGA_API_SECRET']  # EX: 3e0b5...
         self.e.props['API_URL'] = 'https://api.imagga.com/v2'
-        self.e.props['INPUT_LOCATION'] = input_path
         el = EngineListener()
         el.on_tags = self.on_tags
         self.e.listeners.append(el)
 
-    def test_run(self):
-        self.e.run()
+    def test_tag_boy(self):
         input_file_path = os.path.normpath(
             os.path.join(os.getcwd(), 'data', 'images', 'input', 'boy.jpg'))
+        self.e.tag(input_file_path)
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
         self.assertEqual('2b87de0a02694a0448471066fe0bff79b1ab555da4d16c36560e14b18d22e42a',
@@ -35,8 +34,10 @@ class TestImaggaEngine(unittest.TestCase):
         self.assertGreater(50, tagged_item['tags'][tag_name]['confidence'])
         self.assertLess(40, tagged_item['tags'][tag_name]['confidence'])
 
+    def test_tag_girl(self):
         input_file_path = os.path.normpath(
             os.path.join(os.getcwd(), 'data', 'images', 'input', 'girl.jpg'))
+        self.e.tag(input_file_path)
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
         self.assertEqual('d88456c386f2f4a1165728162419a230d7dc75f73198aa685a0ac03cf3ba2ab2',
@@ -47,8 +48,10 @@ class TestImaggaEngine(unittest.TestCase):
         self.assertGreater(80, tagged_item['tags'][tag_name]['confidence'])
         self.assertLess(70, tagged_item['tags'][tag_name]['confidence'])
 
+    def test_tag_puppy(self):
         input_file_path = os.path.normpath(
             os.path.join(os.getcwd(), 'data', 'images', 'input', 'puppy.jpg'))
+        self.e.tag(input_file_path)
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
         self.assertEqual('f4d9d946c0ff1ded0ce1c5139a5a0eb8d0e514d5e4256ee5afe6d89bba68470c',
@@ -57,7 +60,9 @@ class TestImaggaEngine(unittest.TestCase):
         self.assertIn(tag_name, tagged_item['tags'])
         self.assertEqual(100, tagged_item['tags'][tag_name]['confidence'])
 
+    def test_tag_sunflower(self):
         input_file_path = os.path.normpath(os.path.join(os.getcwd(), 'data', 'images', 'input', 'sunflower.jpg'))
+        self.e.tag(input_file_path)
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
         self.assertEqual('7bbafa42a91fba3eea845133afa79f7e665c80ffc1d8e2ca53be25120c4cfe66',
@@ -65,5 +70,3 @@ class TestImaggaEngine(unittest.TestCase):
         tag_name = self.e.calc_tag_name('sunflower')
         self.assertIn(tag_name, tagged_item['tags'])
         self.assertEqual(100, tagged_item['tags'][tag_name]['confidence'])
-
-
