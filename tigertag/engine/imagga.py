@@ -1,8 +1,9 @@
 import argparse
-import json
 import logging
 import os
+import sys
 import time
+from http.client import HTTPConnection  # py3
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -53,9 +54,11 @@ class ImaggaEngine(Engine):
                 #      }
                 #    }
                 if 'result' not in content_response.json():
-                    if current_try > self.tries:
+                    if current_try >= self.tries:
+                        logging.warn('Failed to upload {} after {} tries.'.format(image_path, self.tries))
                         raise KeyError('result not found in {}'.format(content_response))
                     else:
+                        logging.debug('Failed to upload {} try {} of {}.'.format(image_path, current_try, self.tries))
                         time.sleep(current_try * 2)
                         current_try = current_try + 1
                 else:
@@ -124,8 +127,8 @@ class ImaggaEngine(Engine):
             images_count = len(images)
             for iterator, image_file in enumerate(images):
                 image_path = os.path.join(tag_input, image_file)
-                print('[%s / %s] %s uploading' %
-                      (iterator + 1, images_count, image_path))
+                logging.info('[%s / %s] %s uploading' %
+                             (iterator + 1, images_count, image_path))
                 tag_result = self.tag(image_path)
                 for listener in self.listeners:
                     listener.on_tags(self, tag_result)
@@ -162,6 +165,12 @@ def parse_arguments():
 
 
 def main():
+    #HTTPConnection.debuglevel = 1
+    logging.basicConfig(
+        stream=sys.stderr,
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S')
     args = parse_arguments()
 
     api_key = os.environ['IMAGGA_API_KEY']
@@ -176,11 +185,11 @@ def main():
     en.props['LANGUAGE'] = str(args.language)
     en.props['VERBOSE'] = str(args.verbose)
     el = EngineListener()
-    el.on_tags = lambda engine, tag_info : print('{}: {}'.format(tag_info['file_path'], tag_info))
+    el.on_tags = lambda engine, tag_info: print('{}: {}'.format(tag_info['file_path'], tag_info))
     en.listeners.append(el)
-    print('Tagging images started')
+    logging.info('Tagging images started')
     en.run()
-    print('Tagging images complete')
+    logging.info('Tagging images complete')
 
 
 if __name__ == '__main__':

@@ -5,8 +5,11 @@ import unittest
 from tigertag.scanner import *
 from tigertag.scanner.directory import *
 
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
 
 class TestDirectoryScanner(unittest.TestCase):
     def on_file(self, scanner, file_info):
