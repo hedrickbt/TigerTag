@@ -115,14 +115,7 @@ class ImaggaEngine(Engine):
         if 'API_KEY' not in self.props or 'API_SECRET' not in self.props:
             raise ArgumentException('You haven\'t set your API credentials.')
 
-        auth = HTTPBasicAuth(self.props['API_KEY'], self.props['API_SECRET'])
-
         tag_input = self.props['INPUT_LOCATION']
-        tag_output = self.props['OUTPUT_LOCATION']
-        language = 'en' if 'LANGUAGE' not in self.props else self.props['LANGUAGE']
-        verbose = False if 'VERBOSE' not in self.props else str2bool(self.props['VERBOSE'])
-
-        results = {}
         if os.path.isdir(tag_input):
             images = [filename for filename in os.listdir(tag_input)
                       if os.path.isfile(os.path.join(tag_input, filename)) and
@@ -154,13 +147,6 @@ def parse_arguments():
         help='The input - a folder containing images')
 
     parser.add_argument(
-        'output',
-        metavar='<output>',
-        type=str,
-        nargs=1,
-        help='The output - a folder to output the results')
-
-    parser.add_argument(
         '--language',
         type=str,
         default='en',
@@ -188,7 +174,6 @@ def main():
     en.props['API_SECRET'] = api_secret
     en.props['API_URL'] = api_url
     en.props['INPUT_LOCATION'] = args.input[0]
-    en.props['OUTPUT_LOCATION'] = args.output[0]
     en.props['LANGUAGE'] = str(args.language)
     en.props['VERBOSE'] = str(args.verbose)
     el = EngineListener()

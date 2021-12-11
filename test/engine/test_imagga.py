@@ -17,7 +17,6 @@ class TestImaggaEngine(unittest.TestCase):
         self.e.props['API_SECRET'] = os.environ['IMAGGA_API_SECRET']  # EX: 3e0b5...
         self.e.props['API_URL'] = 'https://api.imagga.com/v2'
         self.e.props['INPUT_LOCATION'] = input_path
-        self.e.props['OUTPUT_LOCATION'] = output_path
         el = EngineListener()
         el.on_tags = self.on_tags
         self.e.listeners.append(el)
