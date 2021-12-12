@@ -1,6 +1,5 @@
 import unittest
 
-from tigertag.engine import *
 from tigertag.engine.imagga import *
 
 
