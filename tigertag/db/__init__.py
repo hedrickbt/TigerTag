@@ -63,6 +63,13 @@ class Persist:
             #     d[column.name] = str(getattr(row, column.name))
         return d
 
+    # @staticmethod
+    # def _rows_to_dict(rows):
+    #     results = []
+    #     for row in rows:
+    #         results.append(Persist._row_to_dict(row))
+    #     return results
+
     @staticmethod
     def _handle_tags(session, resource, engine, tags):
         if engine is not None:
@@ -114,6 +121,14 @@ class Persist:
     def get_resource_by_id(self, id):
         with self.engine.session() as session, session.begin():
             row = session.query(Resource).get(id)
+            return Persist._row_to_dict(row)
+
+    def get_resource_by_location(self, location):
+        with self.engine.session() as session, session.begin():
+            row = session.query(Resource) \
+                .filter(Resource
+                .location == location) \
+                .one()
             return Persist._row_to_dict(row)
 
     def get_tags_by_resource_id(self, id):

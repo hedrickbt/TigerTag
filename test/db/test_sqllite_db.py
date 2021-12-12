@@ -182,10 +182,19 @@ class TestPersist(BaseSqlite):
             '3e44cfaa9a914f1312d157130810300f',
             temp_date_time,
         )
-
         resource = self.p.get_resource_by_id(1)
         self.assertEqual('smile.png', resource['name'])
 
+    def test_get_resources_by_location(self):
+        temp_date_time = datetime.datetime.now()
+        self.p.set_resource(
+            'smile.png',
+            'data/images/input/smile.png',
+            '3e44cfaa9a914f1312d157130810300f',
+            temp_date_time,
+        )
+        resource = self.p.get_resource_by_location('data/images/input/smile.png')
+        self.assertEqual('smile.png', resource['name'])
 
     def test_set_resource_with_tags(self):
         temp_date_time = datetime.datetime.now()
