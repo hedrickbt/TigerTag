@@ -27,7 +27,7 @@ class TestEngine(unittest.TestCase):
     def setUp(self):
         if os.path.exists(DB_NAME):
             os.remove(DB_NAME)
-        self.e = Engine(DB_URL)
+        self.e = DbEngine(DB_URL)
         # self.c = None
 
     def test_init(self):
@@ -68,7 +68,7 @@ class TestEnvironmentEngineBuilder(BaseSqlite):
     def setUp(self):
         super().setUp()
         os.environ['DB_URL'] = DB_URL
-        builder = EnvironmentEngineBuilder()
+        builder = EnvironmentDbEngineBuilder()
         self.e = builder.build()
 
     def test_current_time_raw(self):
@@ -94,7 +94,7 @@ class TestEnvironmentEngineBuilder(BaseSqlite):
 class TestEngineWithData(BaseSqlite):
     def setUp(self):
         super().setUp()
-        self.e = Engine(DB_URL)
+        self.e = DbEngine(DB_URL)
 
     def temp_tag_obj(self):
         return Tag(
@@ -171,7 +171,7 @@ class TestEngineWithData(BaseSqlite):
 class TestPersist(BaseSqlite):
     def setUp(self):
         super().setUp()
-        self.e = Engine(DB_URL)
+        self.e = DbEngine(DB_URL)
         self.p = Persist(self.e)
 
     def test_set_resource_minimum(self):
@@ -185,6 +185,23 @@ class TestPersist(BaseSqlite):
         resource = self.p.get_resource_by_id(1)
         self.assertEqual('smile.png', resource['name'])
 
+    def test_set_resource_update(self):
+        temp_date_time = datetime.datetime.now()
+        self.p.set_resource(
+            'smile.png',
+            'data/images/input/smile.png',
+            '3e44cfaa9a914f1312d157130810300f',
+            temp_date_time,
+        )
+        self.p.set_resource(
+            'smile.png',
+            'data/images/input/smile.png',
+            'changed',
+            temp_date_time,
+        )
+        resource = self.p.get_resource_by_id(1)
+        self.assertEqual('changed', resource['hashval'])
+
     def test_get_resources_by_location(self):
         temp_date_time = datetime.datetime.now()
         self.p.set_resource(
@@ -195,6 +212,10 @@ class TestPersist(BaseSqlite):
         )
         resource = self.p.get_resource_by_location('data/images/input/smile.png')
         self.assertEqual('smile.png', resource['name'])
+
+    def test_get_resources_by_location_missing(self):
+        resource = self.p.get_resource_by_location('data/images/input/smile.png')
+        self.assertIsNone(resource)
 
     def test_set_resource_with_tags(self):
         temp_date_time = datetime.datetime.now()

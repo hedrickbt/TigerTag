@@ -30,4 +30,9 @@ revise    alembic revision -m "whatever you are going to do"
 downgrade alembic downgrade <how many steps. ex: -1>
 revision  alembic upgrade <specific revision. ex: ae10>
 delete    alembic downgrade base
+upgrade   alembic upgrade <specific revision, ex: head>
+
+To clean up/recreate db you can do something like
+alembic downgrade -1  (until all changes are gone)
+alembic upgrade head
 

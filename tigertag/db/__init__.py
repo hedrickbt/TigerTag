@@ -10,7 +10,7 @@ from tigertag.db.models import *
 logger = logging.getLogger(__name__)
 
 
-class Engine:
+class DbEngine:
     RESERVED_PROPS = ['DB_URL']
 
     def __init__(self, db_url):
@@ -28,7 +28,7 @@ class Engine:
         self.engine.dispose()
 
 
-class EngineBuilder:
+class DbEngineBuilder:
     def __init__(self):
         pass
 
@@ -36,14 +36,14 @@ class EngineBuilder:
         raise NotImplementedError
 
 
-class EnvironmentEngineBuilder(EngineBuilder):
+class EnvironmentDbEngineBuilder(DbEngineBuilder):
     def __init__(self):
         super().__init__()
 
     def build(self):
         if 'DB_URL' in os.environ:
             db_url = os.environ.get('DB_URL')
-            return Engine(db_url)
+            return DbEngine(db_url)
         else:
             raise ValueError("DB_URL environment variable missing.")
 
@@ -100,10 +100,12 @@ class Persist:
             existing_resource = session.execute(select(Resource).filter_by(location=location)).one_or_none()
             new_record = False
             if existing_resource is None:
+                logger.debug('Adding new resource {}'.format(location))
                 resource = Resource()
                 new_record = True
             else:
-                resource = existing_resource
+                logger.debug('Updating existing resource {}'.format(location))
+                resource = existing_resource.Resource
 
             resource.name = name
             resource.location = location
@@ -128,8 +130,11 @@ class Persist:
             row = session.query(Resource) \
                 .filter(Resource
                 .location == location) \
-                .one()
-            return Persist._row_to_dict(row)
+                .one_or_none()
+            if row is None:
+                return None
+            else:
+                return Persist._row_to_dict(row)
 
     def get_tags_by_resource_id(self, id):
         result = {}

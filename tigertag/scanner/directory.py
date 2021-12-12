@@ -30,6 +30,7 @@ class DirectoryScanner(Scanner):
                     logger.info('Scanning {}'.format(full_filename))
                     file_hash = calc_hash(full_filename)
                     file_info = {
+                        'file_name': filename,
                         'file_path': full_filename,
                         'file_hash': file_hash,
                     }
