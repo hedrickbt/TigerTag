@@ -8,11 +8,17 @@ logger = logging.getLogger(__name__)
 
 
 class DirectoryScanner(Scanner):
-    def __init__(self, name, enabled, path):
+    def __init__(self, name, enabled):
         super().__init__(name, enabled)
-        self.path = path
+        self.path = None
 
     def scan(self):
+        if self.path is None and 'PATH' in self.props:
+            self.path = self.props['PATH']
+        if self.path is None:
+            raise ValueError('The path has not been set for the {} ({}.{})'.format(
+                self.name, __name__, type(self).__name__))
+        self.path = os.path.abspath(self.path)
         for root, directories, filenames in os.walk(self.path):
             for filename in filenames:
                 full_filename = os.path.normpath(os.path.join(root, filename))
@@ -20,7 +26,7 @@ class DirectoryScanner(Scanner):
                 if image_type is None:
                     logger.debug('Ignoring {}'.format(full_filename))
                 else:
-                    logger.debug('Scanning {}'.format(full_filename))
+                    logger.info('Scanning {}'.format(full_filename))
                     for listener in self.listeners:
                         file_info = {
                             'file_path': full_filename,

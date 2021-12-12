@@ -99,6 +99,7 @@ class ImaggaEngine(Engine):
         language = 'en' if 'LANGUAGE' not in self.props else self.props['LANGUAGE']
         verbose = False if 'VERBOSE' not in self.props else str2bool(self.props['VERBOSE'])
 
+        logger.info('Tagging {}'.format(path))
         upload_id = self.upload_image(auth, path)
         tag_result = self.imagga_tag_api(auth, upload_id, True, verbose, language)
 
@@ -151,7 +152,7 @@ def main():
     logging.basicConfig(
         stream=sys.stderr,
         level=logging.INFO,
-        format='%(asctime)s %(levelname)-8s %(message)s',
+        format='%(asctime)s %(levelname)-8s %(name)s : %(funcName)s | %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S')
     args = parse_arguments()
 

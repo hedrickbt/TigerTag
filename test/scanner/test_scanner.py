@@ -32,3 +32,21 @@ class TestScannerManager(unittest.TestCase):
             NotImplementedError,
             'The {} scanner has not implemented the scan method.'.format(self.s.name),
             self.sm.scan)
+
+
+class TestEnvironmentScannerManagerBuilder(unittest.TestCase):
+    def setUp(self):
+        os.environ['SCANNER_TEST_NAME'] = 'tigertag.scanner.Scanner'
+        os.environ['SCANNER_TEST_ENABLED'] = 'True'
+        os.environ['SCANNER_TEST_SPECIAL_PROPERTY'] = 'MySpecialPropertyValue'
+        self.smb = EnvironmentScannerManagerBuilder(ScannerManager)
+
+    def test_build_success(self):
+        sm = self.smb.build()
+        self.assertIn('TEST', sm.scanners)
+        self.assertIn('SPECIAL_PROPERTY', sm.scanners['TEST'].props)
+        self.assertEqual('MySpecialPropertyValue', sm.scanners['TEST'].props['SPECIAL_PROPERTY'])
+
+    def test_scan_not_implemented(self):
+        sm = self.smb.build()
+        self.assertRaises(NotImplementedError, sm.scan)

@@ -9,8 +9,6 @@ class TestImaggaEngine(unittest.TestCase):
         self.found_tags[tag_info['file_path']] = tag_info
 
     def setUp(self):
-        input_path = os.path.normpath(os.path.join(os.getcwd(), 'data', 'images', 'input'))
-        output_path = os.path.normpath(os.path.join(os.getcwd(), 'data', 'images', 'output'))
         self.found_tags = {}
         self.e = ImaggaEngine('imagga_engine', True)
         self.e.props['API_KEY'] = os.environ['IMAGGA_API_KEY']  # EX: acc_9...

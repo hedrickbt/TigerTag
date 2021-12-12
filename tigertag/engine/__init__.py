@@ -29,13 +29,15 @@ class Engine:
 class EngineManager:
     def __init__(self):
         self.engines = {}
-        self.listeners = [] # EngineListener array
+        self.listeners = []  # EngineListener array
 
     def add(self, engine):
         self.engines[engine.name] = engine
 
     def tag(self, path):
         prefixes = []
+        if len(self.engines) == 0:
+            logger.warning('No tag engines configured.  Please check your configuration')
         for engine_name, engine in self.engines.items():
             if engine.prefix is None:
                 raise AttributeError('The {} engine is missing the prefix attribute.'.format(engine_name))
@@ -43,6 +45,7 @@ class EngineManager:
                 raise ValueError('Duplicate prefix {} found in {} engine.  Removing the engine or changing the '
                                  'prefix will resolve the issue.'.format(engine.prefix, engine_name))
             if engine.enabled:
+                engine.listeners = []
                 for engine_listener in self.listeners:
                     engine.listeners.append(engine_listener)
                 engine.tag(path)
@@ -77,7 +80,7 @@ class EnvironmentEngineManagerBuilder(EngineManagerBuilder):
         for env_name, env_value in os.environ.items():
             match = engine_detect.match(env_name)
             if match is not None:
-                print(env_name + ':', env_value)
+                logger.debug('Configuring engine {}:{}'.format(env_name, env_value))
                 engine_env_name = match.group('engine')
                 engine_klass_name = env_value
                 enabled = False

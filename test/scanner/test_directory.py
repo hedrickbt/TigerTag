@@ -8,8 +8,9 @@ from tigertag.scanner.directory import *
 logging.basicConfig(
     stream=sys.stderr,
     level=logging.DEBUG,
-    format='%(asctime)s %(levelname)-8s %(message)s',
+    format='%(asctime)s %(levelname)-8s %(name)s : %(funcName)s | %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
+
 
 class TestDirectoryScanner(unittest.TestCase):
     def on_file(self, scanner, file_info):
@@ -18,7 +19,8 @@ class TestDirectoryScanner(unittest.TestCase):
     def setUp(self):
         self.scan_path = os.path.join(os.getcwd(), 'data')
         self.found_files = {}
-        self.s = DirectoryScanner('directory_scanner', True, self.scan_path)
+        self.s = DirectoryScanner('directory_scanner', True)
+        self.s.props['PATH'] = self.scan_path
         sl = ScannerListener()
         sl.on_file = self.on_file
         self.s.listeners.append(sl)
