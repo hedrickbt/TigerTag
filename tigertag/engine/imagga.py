@@ -168,7 +168,8 @@ def main():
     el.on_tags = lambda engine, tag_info: print('{}: {}'.format(tag_info['file_path'], tag_info))
     en.listeners.append(el)
 
-    s = DirectoryScanner('directory_scanner', True, args.input[0])
+    s = DirectoryScanner('directory_scanner', True)
+    s.props['PATH'] = args.input[0]
     sl = ScannerListener()
     sl.on_file = lambda scanner, file_info: en.tag(file_info['file_path'])
     s.listeners.append(sl)
