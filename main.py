@@ -2,12 +2,16 @@ import datetime
 import logging
 import sys
 
-from tigertag.db import Persist
 from tigertag.db import EnvironmentDbEngineBuilder
+from tigertag.db import Persist
+from tigertag.engine import Engine
 from tigertag.engine import EngineListener
 from tigertag.engine import EngineManager
 from tigertag.engine import EnvironmentEngineManagerBuilder
+from tigertag.engine import TagInfo
 from tigertag.scanner import EnvironmentScannerManagerBuilder
+from tigertag.scanner import FileInfo
+from tigertag.scanner import Scanner
 from tigertag.scanner import ScannerListener
 from tigertag.scanner import ScannerManager
 
@@ -22,33 +26,33 @@ from tigertag.scanner import ScannerManager
 # DB_URL=sqlite:///tigertag.db
 
 logger = logging.getLogger(__name__)
-FOUND_TAGS = {}
-FOUND_FILES = {}
-engine_manager = None
-persist = None
+FOUND_TAGS: dict[str, TagInfo] = {}
+FOUND_FILES: dict[str, FileInfo] = {}
+engine_manager: EngineManager = None
+persist: Persist = None
 
 
-def on_tags(engine, tag_info):
-    FOUND_TAGS[tag_info['file_path']] = tag_info
+def on_tags(engine: Engine, tag_info: TagInfo):
+    FOUND_TAGS[tag_info.path] = tag_info
 
 
-def on_file(scanner, file_info):
+def on_file(scanner: Scanner, file_info: FileInfo):
     tag_it = True
     temp_date_time = datetime.datetime.now()
-    resource = persist.get_resource_by_location(file_info['file_path'])
+    resource = persist.get_resource_by_location(file_info.path)
     if resource is not None:
-        if resource['hashval'] == file_info['file_hash']:
-            logger.debug('Hash did not change.  Will NOT tag {}'.format(file_info['file_path']))
+        if resource['hashval'] == file_info.hash:
+            logger.debug('Hash did not change.  Will NOT tag {}'.format(file_info.path))
             tag_it = False
     persist.set_resource(
-        file_info['file_name'],
-        file_info['file_path'],
-        file_info['file_hash'],
+        file_info.name,
+        file_info.path,
+        file_info.hash,
         temp_date_time
     )
     if tag_it:
-        logger.debug('New file or hash changed.  Will tag {}'.format(file_info['file_path']))
-        engine_manager.tag(file_info['file_path'])
+        logger.debug('New file or hash changed.  Will tag {}'.format(file_info.path))
+        engine_manager.tag(file_info.path)
 
 
 if __name__ == "__main__":

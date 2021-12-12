@@ -2,14 +2,12 @@ import logging
 import os
 import re
 
+from collections import namedtuple
 from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
 
-
-class EngineListener:
-    def on_tags(self, engine, tag_info):
-        pass
+TagInfo = namedtuple('TagInfo', 'path tags')
 
 
 class Engine:
@@ -24,6 +22,11 @@ class Engine:
 
     def tag(self, path):
         raise NotImplementedError('The {} engine has not implemented the tag method.'.format(self.name))
+
+
+class EngineListener:
+    def on_tags(self, engine: Engine, tag_info: TagInfo):
+        pass
 
 
 class EngineManager:

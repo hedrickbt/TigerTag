@@ -2,14 +2,12 @@ import logging
 import os
 import re
 
+from collections import namedtuple
 from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
 
-
-class ScannerListener:
-    def on_file(self, scanner, file_info):
-        pass
+FileInfo = namedtuple('FileInfo', 'name path hash')
 
 
 class Scanner:
@@ -23,6 +21,11 @@ class Scanner:
 
     def scan(self):
         raise NotImplementedError('The {} scanner has not implemented the scan method.'.format(self.name))
+
+
+class ScannerListener:
+    def on_file(self, scanner: Scanner, file_info: FileInfo):
+        pass
 
 
 class ScannerManager:

@@ -11,6 +11,7 @@ from requests.auth import HTTPBasicAuth
 from tigertag.scanner.directory import DirectoryScanner
 from tigertag.scanner import ScannerListener
 from tigertag.engine import Engine
+from tigertag.engine import TagInfo
 from tigertag.engine import EngineListener
 from tigertag.util import str2bool
 
@@ -102,19 +103,21 @@ class ImaggaEngine(Engine):
         upload_id = self.upload_image(auth, path)
         tag_result = self.imagga_tag_api(auth, upload_id, True, verbose, language)
 
-        tag_resonse = {
-            'file_path': path,
-            'tags': {},
-        }
+        tag_response: TagInfo = None
         if 'result' in tag_result and 'tags' in tag_result['result']:
+            tags = {}
             for tag_item in tag_result['result']['tags']:
                 new_tag = self.calc_tag_name(tag_item['tag']['en'])
-                tag_resonse['tags'][new_tag] = {
+                tags[new_tag] = {
                     'confidence': tag_item['confidence']
                 }
+            tag_response = TagInfo(path, tags)
+        else:
+            tag_response = TagInfo(path, {})
+
         for listener in self.listeners:
-            listener.on_tags(self, tag_resonse)
-        return tag_resonse
+            listener.on_tags(self, tag_response)
+        return tag_response
 
 
 def parse_arguments():
@@ -165,13 +168,13 @@ def main():
     en.props['VERBOSE'] = str(args.verbose)
 
     el = EngineListener()
-    el.on_tags = lambda engine, tag_info: print('{}: {}'.format(tag_info['file_path'], tag_info))
+    el.on_tags = lambda engine, tag_info: print('{}: {}'.format(tag_info.path, tag_info))
     en.listeners.append(el)
 
     s = DirectoryScanner('directory_scanner', True)
     s.props['PATH'] = args.input[0]
     sl = ScannerListener()
-    sl.on_file = lambda scanner, file_info: en.tag(file_info['file_path'])
+    sl.on_file = lambda scanner, file_info: en.tag(file_info.path)
     s.listeners.append(sl)
 
     logging.info('Tagging images started')

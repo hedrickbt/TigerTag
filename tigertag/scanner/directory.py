@@ -3,6 +3,7 @@ import logging
 import os
 
 from tigertag.scanner import Scanner
+from tigertag.scanner import FileInfo
 from tigertag.util import calc_hash
 
 logger = logging.getLogger(__name__)
@@ -29,10 +30,6 @@ class DirectoryScanner(Scanner):
                 else:
                     logger.info('Scanning {}'.format(full_filename))
                     file_hash = calc_hash(full_filename)
-                    file_info = {
-                        'file_name': filename,
-                        'file_path': full_filename,
-                        'file_hash': file_hash,
-                    }
+                    file_info = FileInfo(filename, full_filename, file_hash)
                     for listener in self.listeners:
                         listener.on_file(self, file_info)
