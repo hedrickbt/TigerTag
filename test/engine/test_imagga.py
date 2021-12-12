@@ -24,8 +24,6 @@ class TestImaggaEngine(unittest.TestCase):
         self.e.tag(input_file_path)
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
-        self.assertEqual('2b87de0a02694a0448471066fe0bff79b1ab555da4d16c36560e14b18d22e42a',
-                         tagged_item['file_hash'])
         # Confidence was 44.7116928100586 on 11.28.2021
         tag_name = self.e.calc_tag_name('portrait')
         self.assertIn(tag_name, tagged_item['tags'])
@@ -38,8 +36,6 @@ class TestImaggaEngine(unittest.TestCase):
         self.e.tag(input_file_path)
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
-        self.assertEqual('d88456c386f2f4a1165728162419a230d7dc75f73198aa685a0ac03cf3ba2ab2',
-                         tagged_item['file_hash'])
         # Confidence was 74.9766006469727 on 11.28.2021
         tag_name = self.e.calc_tag_name('afro')
         self.assertIn(tag_name, tagged_item['tags'])
@@ -52,8 +48,6 @@ class TestImaggaEngine(unittest.TestCase):
         self.e.tag(input_file_path)
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
-        self.assertEqual('f4d9d946c0ff1ded0ce1c5139a5a0eb8d0e514d5e4256ee5afe6d89bba68470c',
-                         tagged_item['file_hash'])
         tag_name = self.e.calc_tag_name('dog')
         self.assertIn(tag_name, tagged_item['tags'])
         self.assertEqual(100, tagged_item['tags'][tag_name]['confidence'])
@@ -63,8 +57,6 @@ class TestImaggaEngine(unittest.TestCase):
         self.e.tag(input_file_path)
         self.assertIn(input_file_path, self.found_tags)
         tagged_item = self.found_tags[input_file_path]
-        self.assertEqual('7bbafa42a91fba3eea845133afa79f7e665c80ffc1d8e2ca53be25120c4cfe66',
-                         tagged_item['file_hash'])
         tag_name = self.e.calc_tag_name('sunflower')
         self.assertIn(tag_name, tagged_item['tags'])
         self.assertEqual(100, tagged_item['tags'][tag_name]['confidence'])

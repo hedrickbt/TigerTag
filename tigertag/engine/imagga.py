@@ -12,7 +12,6 @@ from tigertag.scanner.directory import DirectoryScanner
 from tigertag.scanner import ScannerListener
 from tigertag.engine import Engine
 from tigertag.engine import EngineListener
-from tigertag.util import calc_hash
 from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
@@ -103,10 +102,8 @@ class ImaggaEngine(Engine):
         upload_id = self.upload_image(auth, path)
         tag_result = self.imagga_tag_api(auth, upload_id, True, verbose, language)
 
-        file_hash = calc_hash(path)
         tag_resonse = {
             'file_path': path,
-            'file_hash': file_hash,
             'tags': {},
         }
         if 'result' in tag_result and 'tags' in tag_result['result']:
