@@ -2,6 +2,12 @@ import unittest
 
 from tigertag.engine.imagga import *
 
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)-8s %(name)s : %(funcName)s | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
+
 
 class TestImaggaEngine(unittest.TestCase):
     def on_tags(self, engine: Engine, tag_info: TagInfo):

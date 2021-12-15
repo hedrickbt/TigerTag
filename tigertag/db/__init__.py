@@ -1,7 +1,7 @@
 import logging
 import os
 import sqlalchemy
-from sqlalchemy import create_engine, select, delete
+from sqlalchemy import create_engine, select, delete, and_
 from sqlalchemy import MetaData
 from sqlalchemy.orm import sessionmaker
 
@@ -71,10 +71,20 @@ class Persist:
     #     return results
 
     @staticmethod
+    def _clear_resource_engine_tags(session, resource, engine):
+        res_tags = session.query(ResourceTag).filter(
+            ResourceTag.resource_id == resource.id,
+            Tag.engine == engine,
+            ResourceTag.tag_id == Tag.id
+        )
+        for res_tag in res_tags:
+            session.delete(res_tag)
+
+    @staticmethod
     def _handle_tags(session, resource, engine, tags):
         if engine is not None:
             if tags is not None:
-                session.execute(delete(ResourceTag).where(ResourceTag.resource_id == resource.id))
+                Persist._clear_resource_engine_tags(session, resource, engine)
                 temp_resource_tags = []
                 for tag_name, tag_values in tags.items():
                     tag = Tag(

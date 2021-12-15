@@ -250,6 +250,7 @@ class TestPersist(BaseSqlite):
 
     def test_set_resource_with_tags_update(self):
         temp_date_time = datetime.datetime.now()
+        # Add tags for TESTENGINE
         tags = {
             'smile': {
                 'confidence': 100
@@ -270,6 +271,22 @@ class TestPersist(BaseSqlite):
             tags=tags
         )
 
+        # Add tags for ANOTHERENGINE
+        tags = {
+            'chevette': {
+                'confidence': 10
+            },
+            'ferrari': {
+                'confidence': 5
+            },
+        }
+        self.p.set_resource(
+            'data/images/input/smile.png',
+            engine='ANOTHERENGINE',
+            tags=tags
+        )
+
+        # Replace tags for TESTENGINE
         tags = {
             'clown': {
                 'confidence': 99
@@ -285,8 +302,16 @@ class TestPersist(BaseSqlite):
         )
 
         tags = self.p.get_tags_by_resource_id(1)
-        self.assertEqual(2, len(tags))
+        self.assertEqual(4, len(tags))
         self.assertEqual('clown', tags['clown']['name'])
+        self.assertEqual('TESTENGINE', tags['clown']['engine'])
         self.assertEqual(99, tags['clown']['confidence'])
         self.assertEqual('circus', tags['circus']['name'])
+        self.assertEqual('TESTENGINE', tags['circus']['engine'])
         self.assertEqual(33, tags['circus']['confidence'])
+        self.assertEqual('chevette', tags['chevette']['name'])
+        self.assertEqual('ANOTHERENGINE', tags['chevette']['engine'])
+        self.assertEqual(10, tags['chevette']['confidence'])
+        self.assertEqual('ferrari', tags['ferrari']['name'])
+        self.assertEqual('ANOTHERENGINE', tags['ferrari']['engine'])
+        self.assertEqual(5, tags['ferrari']['confidence'])
