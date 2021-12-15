@@ -177,8 +177,8 @@ class TestPersist(BaseSqlite):
     def test_set_resource_minimum(self):
         temp_date_time = datetime.datetime.now()
         self.p.set_resource(
-            'smile.png',
             'data/images/input/smile.png',
+            'smile.png',
             '3e44cfaa9a914f1312d157130810300f',
             temp_date_time,
         )
@@ -188,14 +188,14 @@ class TestPersist(BaseSqlite):
     def test_set_resource_update(self):
         temp_date_time = datetime.datetime.now()
         self.p.set_resource(
-            'smile.png',
             'data/images/input/smile.png',
+            'smile.png',
             '3e44cfaa9a914f1312d157130810300f',
             temp_date_time,
         )
         self.p.set_resource(
-            'smile.png',
             'data/images/input/smile.png',
+            'smile.png',
             'changed',
             temp_date_time,
         )
@@ -205,8 +205,8 @@ class TestPersist(BaseSqlite):
     def test_get_resources_by_location(self):
         temp_date_time = datetime.datetime.now()
         self.p.set_resource(
-            'smile.png',
             'data/images/input/smile.png',
+            'smile.png',
             '3e44cfaa9a914f1312d157130810300f',
             temp_date_time,
         )
@@ -231,8 +231,8 @@ class TestPersist(BaseSqlite):
             }
         }
         self.p.set_resource(
-            'smile.png',
             'data/images/input/smile.png',
+            'smile.png',
             '3e44cfaa9a914f1312d157130810300f',
             temp_date_time,
             engine='TESTENGINE',
@@ -248,3 +248,45 @@ class TestPersist(BaseSqlite):
         self.assertEqual('circle', tags['circle']['name'])
         self.assertEqual(25, tags['circle']['confidence'])
 
+    def test_set_resource_with_tags_update(self):
+        temp_date_time = datetime.datetime.now()
+        tags = {
+            'smile': {
+                'confidence': 100
+            },
+            'face': {
+                'confidence': 95
+            },
+            'circle': {
+                'confidence': 25
+            }
+        }
+        self.p.set_resource(
+            'data/images/input/smile.png',
+            'smile.png',
+            '3e44cfaa9a914f1312d157130810300f',
+            temp_date_time,
+            engine='TESTENGINE',
+            tags=tags
+        )
+
+        tags = {
+            'clown': {
+                'confidence': 99
+            },
+            'circus': {
+                'confidence': 33
+            },
+        }
+        self.p.set_resource(
+            'data/images/input/smile.png',
+            engine='TESTENGINE',
+            tags=tags
+        )
+
+        tags = self.p.get_tags_by_resource_id(1)
+        self.assertEqual(2, len(tags))
+        self.assertEqual('clown', tags['clown']['name'])
+        self.assertEqual(99, tags['clown']['confidence'])
+        self.assertEqual('circus', tags['circus']['name'])
+        self.assertEqual(33, tags['circus']['confidence'])

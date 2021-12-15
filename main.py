@@ -24,6 +24,7 @@ from tigertag.scanner import ScannerManager
 # ENGINE_IMAGGA_API_SECRET=<VALUE>
 # ENGINE_IMAGGA_API_URL=https://api.imagga.com/v2
 # DB_URL=sqlite:///tigertag.db
+MIN_CONFIDENCE = 40
 
 logger = logging.getLogger(__name__)
 FOUND_TAGS: dict[str, TagInfo] = {}
@@ -33,7 +34,14 @@ persist: Persist = None
 
 
 def on_tags(engine: Engine, tag_info: TagInfo):
-    FOUND_TAGS[tag_info.path] = tag_info
+    new_tags = dict(filter(lambda elem: elem[1]['confidence'] >= MIN_CONFIDENCE, tag_info.tags.items()))
+    new_tag_info = TagInfo(tag_info.path, new_tags)
+    FOUND_TAGS[tag_info.path] = new_tag_info
+    persist.set_resource(
+        tag_info.path,
+        engine=engine.name,
+        tags=new_tags
+    )
 
 
 def on_file(scanner: Scanner, file_info: FileInfo):
@@ -44,14 +52,14 @@ def on_file(scanner: Scanner, file_info: FileInfo):
         if resource['hashval'] == file_info.hash:
             logger.debug('Hash did not change.  Will NOT tag {}'.format(file_info.path))
             tag_it = False
-    persist.set_resource(
-        file_info.name,
-        file_info.path,
-        file_info.hash,
-        temp_date_time
-    )
     if tag_it:
         logger.debug('New file or hash changed.  Will tag {}'.format(file_info.path))
+        persist.set_resource(
+            file_info.path,
+            file_info.name,
+            file_info.hash,
+            temp_date_time
+        )
         engine_manager.tag(file_info.path)
 
 

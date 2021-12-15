@@ -1,7 +1,7 @@
 import logging
 import os
 import sqlalchemy
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, delete
 from sqlalchemy import MetaData
 from sqlalchemy.orm import sessionmaker
 
@@ -74,6 +74,7 @@ class Persist:
     def _handle_tags(session, resource, engine, tags):
         if engine is not None:
             if tags is not None:
+                session.execute(delete(ResourceTag).where(ResourceTag.resource_id == resource.id))
                 temp_resource_tags = []
                 for tag_name, tag_values in tags.items():
                     tag = Tag(
@@ -95,7 +96,8 @@ class Persist:
             if tags is not None:
                 raise ValueError('While trying to set a resource, the engine was None.')
 
-    def set_resource(self, name, location, hashval, last_indexed, description=None, engine=None, tags=None):
+    def set_resource(self, location, name=None, hashval=None, last_indexed=None, description=None, engine=None,
+                     tags=None):
         with self.engine.session() as session, session.begin():
             existing_resource = session.execute(select(Resource).filter_by(location=location)).one_or_none()
             new_record = False
@@ -107,10 +109,14 @@ class Persist:
                 logger.debug('Updating existing resource {}'.format(location))
                 resource = existing_resource.Resource
 
-            resource.name = name
-            resource.location = location
-            resource.hashval = hashval
-            resource.last_indexed = last_indexed
+            if name is not None:
+                resource.name = name
+            if location is not None:
+                resource.location = location
+            if hashval is not None:
+                resource.hashval = hashval
+            if last_indexed is not None:
+                resource.last_indexed = last_indexed
 
             if description is not None:
                 resource.description = description
