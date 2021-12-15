@@ -7,7 +7,7 @@ from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
 
-FileInfo = namedtuple('FileInfo', 'name path hash')
+FileInfo = namedtuple('FileInfo', 'name path hash temp')
 
 
 class Scanner:

@@ -1,6 +1,6 @@
 requests>=2.26.0
 sqlalchemy>=1.4.26
 alembic>=1.7.4
-
 sqlalchemy-diff>=0.1.5
 alembic-verify>=0.1.4
+plexapi>=4.7.2

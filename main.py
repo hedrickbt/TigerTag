@@ -18,6 +18,11 @@ from tigertag.scanner import ScannerManager
 # SCANNER_DIRECTORY_NAME=tigertag.scanner.directory.DirectoryScanner
 # SCANNER_DIRECTORY_ENABLED=True
 # SCANNER_DIRECTORY_PATH=data/images/input
+# SCANNER_PLEX_NAME=tigertag.scanner.plex.PlexScanner
+# SCANNER_PLEX_ENABLED=True
+# SCANNER_PLEX_TOKEN=<VALUE>
+# SCANNER_PLEX_URL=<VALUE ex: http://127.0.0.1:32400>
+# SCANNER_PLEX_SECTION=<VALUE ex: TEST Family Photos>
 # ENGINE_IMAGGA_NAME=tigertag.engine.imagga.ImaggaEngine
 # ENGINE_IMAGGA_ENABLED=True
 # ENGINE_IMAGGA_API_KEY=<VALUE>

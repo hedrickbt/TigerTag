@@ -112,7 +112,8 @@ class ImaggaEngine(Engine):
     def calc_tag_name(self, tag_name):
         return '{}_{}'.format(self.prefix, tag_name)
 
-    def tag(self, path):
+    def tag(self, path, temp=None):
+        tag_path = path if temp is None else temp
         if 'API_KEY' not in self.props or 'API_SECRET' not in self.props:
             raise ArgumentException('You haven\'t set your API credentials.')
 
@@ -121,8 +122,8 @@ class ImaggaEngine(Engine):
         language = 'en' if 'LANGUAGE' not in self.props else self.props['LANGUAGE']
         verbose = False if 'VERBOSE' not in self.props else str2bool(self.props['VERBOSE'])
 
-        logger.info('Tagging {}'.format(path))
-        upload_id = self.upload_image(auth, path)
+        logger.info('Tagging {}'.format(tag_path))
+        upload_id = self.upload_image(auth, tag_path)
         tag_result = self.imagga_tag_api(auth, upload_id, True, verbose, language)
 
         tag_response: TagInfo = None
