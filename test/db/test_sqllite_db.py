@@ -315,3 +315,47 @@ class TestPersist(BaseSqlite):
         self.assertEqual('ferrari', tags['ferrari']['name'])
         self.assertEqual('ANOTHERENGINE', tags['ferrari']['engine'])
         self.assertEqual(5, tags['ferrari']['confidence'])
+
+
+    def test_set_resource_with_tags_duplicate_tags(self):
+        # This should not throw an exception.  The hair
+        # tag should be shared by the face and leg resource
+        # and not try to create the tag twice.
+
+        temp_date_time = datetime.datetime.now()
+        # Add tags for face
+        tags = {
+            'face': {
+                'confidence': 95
+            },
+            'hair': {
+                'confidence': 25
+            }
+        }
+        self.p.set_resource(
+            'data/images/input/face.png',
+            'face.png',
+            'no matter',
+            temp_date_time,
+            engine='TESTENGINE',
+            tags=tags
+        )
+
+        # Add tags for leg
+        tags = {
+            'leg': {
+                'confidence': 95
+            },
+            'hair': {
+                'confidence': 25
+            }
+        }
+        self.p.set_resource(
+            'data/images/input/leg.png',
+            'leg.png',
+            'no matter',
+            temp_date_time,
+            engine='TESTENGINE',
+            tags=tags
+        )
+
