@@ -30,5 +30,5 @@ class TestPlexScanner(unittest.TestCase):
         self.s.scan()
 
         # Since these tests depend on your personal library, they have to be very generic
-        self.assertGreater(0, len(self.found_files))
+        self.assertGreater(len(self.found_files), 0)
 

@@ -1,21 +1,24 @@
 import argparse
 import logging
 import os
+import shutil
 import sys
+import tempfile
 import time
-from http.client import HTTPConnection  # py3
 
 import requests
+from PIL import Image
 from requests.auth import HTTPBasicAuth
 
-from tigertag.scanner.directory import DirectoryScanner
-from tigertag.scanner import ScannerListener
 from tigertag.engine import Engine
-from tigertag.engine import TagInfo
 from tigertag.engine import EngineListener
+from tigertag.engine import TagInfo
+from tigertag.scanner import ScannerListener
+from tigertag.scanner.directory import DirectoryScanner
 from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
+MAX_SHORT_SIDE = 300
 
 
 class ArgumentException(Exception):
@@ -30,10 +33,52 @@ class ImaggaEngine(Engine):
         self.prefix = 'tti'
         self.tries = tries
 
+    @staticmethod
+    def _create_temporary_copy(image_path):
+        root, ext = os.path.splitext(image_path)
+        tmp = tempfile.NamedTemporaryFile(suffix=ext, delete=True)
+        tmp.close()
+        shutil.copy2(image_path, tmp.name)
+        return tmp.name
+
+    @staticmethod
+    def _create_scaled_image(image_path):
+        # https://docs.imagga.com/#color-palette-deterministic
+        # The API doesn't need more that 300px on the shortest side to provide you
+        # with the same great results.
+        result = None
+        need_scale = False
+        old_bytes = os.stat(image_path).st_size
+        with Image.open(image_path) as img:
+            width, height = img.size
+            if width < height and width > MAX_SHORT_SIDE:
+                new_width = 300
+                percent = new_width/width
+                new_height = int((float(height) * float(percent)))
+                need_scale = True
+            elif width > height and height > MAX_SHORT_SIDE:
+                new_height = 300
+                percent = new_height / height
+                new_width = int((float(width) * float(percent)))
+                need_scale = True
+
+            scaled_image_path = ImaggaEngine._create_temporary_copy(image_path)
+            if need_scale:
+                img = img.resize((new_width, new_height), Image.ANTIALIAS)
+                img.save(scaled_image_path)
+                new_bytes = os.stat(scaled_image_path).st_size
+                logger.debug(f'Resizing {image_path} as {scaled_image_path} from '
+                             f'({width},{height}) to ({new_width},{new_height}) with old/new bytes '
+                             f'{old_bytes}/{new_bytes}.')
+
+            return scaled_image_path
+
     def upload_image(self, auth, image_path):
         upload_id = None
         if not os.path.isfile(image_path):
             raise ArgumentException('Invalid image path')
+
+        scaled_image_path = ImaggaEngine._create_scaled_image(image_path)
 
         # Open the desired file
         with open(image_path, 'rb') as image_file:
