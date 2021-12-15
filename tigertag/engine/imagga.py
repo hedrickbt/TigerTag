@@ -81,7 +81,7 @@ class ImaggaEngine(Engine):
         scaled_image_path = ImaggaEngine._create_scaled_image(image_path)
 
         # Open the desired file
-        with open(image_path, 'rb') as image_file:
+        with open(scaled_image_path, 'rb') as image_file:
             current_try = 1
             success = False
             while not success and current_try <= self.tries:
@@ -103,19 +103,22 @@ class ImaggaEngine(Engine):
                 logging.debug(f'Response status: {content_response.status_code}')
                 if 'result' not in content_response.json():
                     if current_try >= self.tries:
-                        logging.warning('Failed to upload {} after {} tries.'.format(image_path, self.tries))
+                        logging.warning('Failed to upload {} as {} after {} tries.'.format(image_path, scaled_image_path, self.tries))
                         raise KeyError('result not found in {}'.format(content_response))
                     else:
-                        logging.warning('Unable to upload {} try {} of {}.'.format(image_path, current_try, self.tries))
+                        logging.warning('Unable to upload {} as {} try {} of {}.'.format(
+                            image_path, scaled_image_path, current_try, self.tries))
                         time.sleep(current_try * 2)
                         current_try = current_try + 1
                 else:
-                    logging.debug('Uploaded {} after {} tries.'.format(image_path, current_try))
+                    logging.debug('Uploaded {} as {} after {} tries.'.format(
+                        image_path, scaled_image_path, current_try))
                     success = True
                     uploaded_file = content_response.json()['result']
 
                     # Get the upload id of the uploaded file
                     upload_id = uploaded_file['upload_id']
+        os.remove(scaled_image_path)
         return upload_id
 
     def imagga_tag_api(self, auth, image, upload_id=False, verbose=False, language='en'):

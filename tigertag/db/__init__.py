@@ -85,12 +85,16 @@ class Persist:
         if engine is not None:
             if tags is not None:
                 Persist._clear_resource_engine_tags(session, resource, engine)
-                temp_resource_tags = []
+                # temp_resource_tags = []
                 for tag_name, tag_values in tags.items():
-                    tag = Tag(
-                        name=tag_name,
-                        engine=engine,
-                    )
+                    existing_tag = session.execute(select(Tag).filter_by(name=tag_name, engine=engine)).one_or_none()
+                    if existing_tag is None:
+                        tag = Tag(
+                            name=tag_name,
+                            engine=engine,
+                        )
+                    else:
+                        tag = existing_tag.Tag
                     resource_tag = ResourceTag(
                         resource=resource,
                         tag=tag,

@@ -44,8 +44,8 @@ class TestImaggaEngine(unittest.TestCase):
         # Confidence was 74.9766006469727 on 11.28.2021
         tag_name = self.e.calc_tag_name('afro')
         self.assertIn(tag_name, tagged_item.tags)
-        self.assertGreater(80, tagged_item.tags[tag_name]['confidence'])
-        self.assertLess(70, tagged_item.tags[tag_name]['confidence'])
+        self.assertGreater(50, tagged_item.tags[tag_name]['confidence'])
+        self.assertLess(40, tagged_item.tags[tag_name]['confidence'])
 
     def test_tag_puppy(self):
         input_file_path = os.path.normpath(
