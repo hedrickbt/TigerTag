@@ -14,6 +14,8 @@ from tigertag.scanner import FileInfo
 from tigertag.scanner import Scanner
 from tigertag.scanner import ScannerListener
 from tigertag.scanner import ScannerManager
+from tigertag.stasher import StasherManager
+from tigertag.stasher import EnvironmentStasherManagerBuilder
 
 # SCANNER_DIRECTORY_NAME=tigertag.scanner.directory.DirectoryScanner
 # SCANNER_DIRECTORY_ENABLED=True
@@ -28,6 +30,8 @@ from tigertag.scanner import ScannerManager
 # ENGINE_IMAGGA_API_KEY=<VALUE>
 # ENGINE_IMAGGA_API_SECRET=<VALUE>
 # ENGINE_IMAGGA_API_URL=https://api.imagga.com/v2
+# STASHER_CONSOLE_NAME=tigertag.stasher.console.ConsoleStasher
+# STASHER_CONSOLE_ENABLED=True
 # DB_URL=sqlite:///tigertag.db
 MIN_CONFIDENCE = 40
 
@@ -35,6 +39,7 @@ logger = logging.getLogger(__name__)
 FOUND_TAGS: dict[str, TagInfo] = {}
 FOUND_FILES: dict[str, FileInfo] = {}
 engine_manager: EngineManager = None
+stasher_manager: StasherManager = None
 persist: Persist = None
 
 
@@ -47,6 +52,7 @@ def on_tags(engine: Engine, tag_info: TagInfo):
         engine=engine.name,
         tags=new_tags
     )
+    stasher_manager.stash(engine, tag_info.path, new_tags)
 
 
 def on_file(scanner: Scanner, file_info: FileInfo):
@@ -85,11 +91,13 @@ if __name__ == "__main__":
     engine_manager = emb.build()
     engine_manager.listeners.append(el)
 
+    stmb = EnvironmentStasherManagerBuilder(StasherManager)
+    stasher_manager = stmb.build()
+
     sl = ScannerListener()
     sl.on_file = on_file
     smb = EnvironmentScannerManagerBuilder(ScannerManager)
     sm = smb.build()
     sm.listeners.append(sl)
-    sm.scan()
 
-    print(FOUND_TAGS)
+    sm.scan()

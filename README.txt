@@ -36,3 +36,9 @@ To clean up/recreate db you can do something like
 alembic downgrade -1  (until all changes are gone)
 alembic upgrade head
 
+Other things to look at
+MachineBox / Objectbox (facebox?) - COST?
+Compreface - face
+Luminoth - object
+OpenCV - object
+  https://www.youtube.com/watch?v=HXDD7-EnGBY&ab_channel=Murtaza%27sWorkshop-RoboticsandAI
