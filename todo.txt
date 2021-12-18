@@ -1,0 +1,1 @@
+TODO: Add an ext_id field (str) in the callback from scan/on_file and on_tags to be able to have things like Plex be able to coordinate a scanned image with a Plex item

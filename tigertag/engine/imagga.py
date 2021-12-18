@@ -52,12 +52,12 @@ class ImaggaEngine(Engine):
         with Image.open(image_path) as img:
             width, height = img.size
             if width < height and width > MAX_SHORT_SIDE:
-                new_width = 300
+                new_width = MAX_SHORT_SIDE
                 percent = new_width/width
                 new_height = int((float(height) * float(percent)))
                 need_scale = True
             elif width > height and height > MAX_SHORT_SIDE:
-                new_height = 300
+                new_height = MAX_SHORT_SIDE
                 percent = new_height / height
                 new_width = int((float(width) * float(percent)))
                 need_scale = True
@@ -70,7 +70,9 @@ class ImaggaEngine(Engine):
                 logger.debug(f'Resizing {image_path} as {scaled_image_path} from '
                              f'({width},{height}) to ({new_width},{new_height}) with old/new bytes '
                              f'{old_bytes}/{new_bytes}.')
-
+            else:
+                logger.debug(f'Using original {image_path} as {scaled_image_path} '
+                             f'({width},{height}) with {old_bytes} bytes.')
             return scaled_image_path
 
     def upload_image(self, auth, image_path):
@@ -101,7 +103,7 @@ class ImaggaEngine(Engine):
                 #      }
                 #    }
                 logging.debug(f'Response status: {content_response.status_code}')
-                if 'result' not in content_response.json():
+                if content_response.status_code == 504 or 'result' not in content_response.json():
                     if current_try >= self.tries:
                         logging.warning('Failed to upload {} as {} after {} tries.'.format(image_path, scaled_image_path, self.tries))
                         raise KeyError('result not found in {}'.format(content_response))
@@ -142,7 +144,7 @@ class ImaggaEngine(Engine):
 
             logging.debug(f'Response status: {tagging_response.status_code}')
             tagging_json = tagging_response.json()
-            if 'result' not in tagging_json or \
+            if tagging_response.status_code == 504 or 'result' not in tagging_json or \
                     'tags' not in tagging_json['result']:
                 if current_try >= self.tries:
                     logging.warning('Failed to tag {} after {} tries.'.format(image, self.tries))

@@ -33,7 +33,7 @@ from tigertag.stasher import EnvironmentStasherManagerBuilder
 # STASHER_CONSOLE_NAME=tigertag.stasher.console.ConsoleStasher
 # STASHER_CONSOLE_ENABLED=True
 # DB_URL=sqlite:///tigertag.db
-MIN_CONFIDENCE = 40
+MIN_CONFIDENCE = 30
 
 logger = logging.getLogger(__name__)
 FOUND_TAGS: dict[str, TagInfo] = {}
