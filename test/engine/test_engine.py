@@ -5,10 +5,11 @@ from tigertag.engine import *
 
 class TestEngine(unittest.TestCase):
     def setUp(self):
-        self.e = Engine('test_engine', False)
+        self.e = Engine('test_engine', 'tst', False)
 
     def test_init(self):
         self.assertEqual(self.e.name, 'test_engine')
+        self.assertEqual(self.e.prefix, 'tst')
         self.assertEqual(self.e.enabled, False)
 
     def test_tag_not_implemented(self):
@@ -18,8 +19,7 @@ class TestEngine(unittest.TestCase):
 class TestEngineManager(unittest.TestCase):
     def setUp(self):
         self.em = EngineManager()
-        self.e = Engine('test_engine_2', True)
-        self.e.prefix = 'ttt'
+        self.e = Engine('test_engine_2', 'tst', True)
         self.em.add(self.e)
 
     def test_engine_exists(self):
@@ -38,9 +38,8 @@ class TestEngineManager(unittest.TestCase):
 
     def test_duplicate_prefix(self):
         self.e.tag = self._tag_stub
-        self.e3 = Engine('test_engine_3', True)
+        self.e3 = Engine('test_engine_3', 'tst', True)
         self.e3.tag = self._tag_stub
-        self.e3.prefix = 'ttt'
         self.em.add(self.e3)
         self.assertRaisesRegex(
             ValueError,
@@ -58,6 +57,7 @@ class TestEngineManager(unittest.TestCase):
 class TestEnvironmentEngineManagerBuilder(unittest.TestCase):
     def setUp(self):
         os.environ['ENGINE_TEST_NAME'] = 'tigertag.engine.Engine'
+        os.environ['ENGINE_TEST_PREFIX'] = 'tst'
         os.environ['ENGINE_TEST_ENABLED'] = 'True'
         os.environ['ENGINE_TEST_SPECIAL_PROPERTY'] = 'MySpecialPropertyValue'
         self.emb = EnvironmentEngineManagerBuilder(EngineManager)

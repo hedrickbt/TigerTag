@@ -28,9 +28,8 @@ class ArgumentException(Exception):
 class ImaggaEngine(Engine):
     FILE_TYPES = ['png', 'jpg', 'jpeg', 'gif']
 
-    def __init__(self, name, enabled, tries=5):
-        super().__init__(name, enabled)
-        self.prefix = 'tti'
+    def __init__(self, name, prefix, enabled, tries=5):
+        super().__init__(name, prefix, enabled)
         self.tries = tries
 
     @staticmethod

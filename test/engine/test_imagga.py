@@ -15,7 +15,7 @@ class TestImaggaEngine(unittest.TestCase):
 
     def setUp(self):
         self.found_tags: dict[str, TagInfo] = {}
-        self.e = ImaggaEngine('imagga_engine', True)
+        self.e = ImaggaEngine('imagga_engine', 'tti', True)
         self.e.props['API_KEY'] = os.environ['IMAGGA_API_KEY']  # EX: acc_9...
         self.e.props['API_SECRET'] = os.environ['IMAGGA_API_SECRET']  # EX: 3e0b5...
         self.e.props['API_URL'] = 'https://api.imagga.com/v2'

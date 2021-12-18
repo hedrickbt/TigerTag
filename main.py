@@ -26,6 +26,7 @@ from tigertag.stasher import EnvironmentStasherManagerBuilder
 # SCANNER_PLEX_URL=<VALUE ex: http://127.0.0.1:32400>
 # SCANNER_PLEX_SECTION=<VALUE ex: TEST Family Photos>
 # ENGINE_IMAGGA_NAME=tigertag.engine.imagga.ImaggaEngine
+# ENGINE_IMAGGA_PREFIX=tti
 # ENGINE_IMAGGA_ENABLED=True
 # ENGINE_IMAGGA_API_KEY=<VALUE>
 # ENGINE_IMAGGA_API_SECRET=<VALUE>

@@ -11,13 +11,13 @@ TagInfo = namedtuple('TagInfo', 'path tags')
 
 
 class Engine:
-    RESERVED_PROPS = ['NAME', 'ENABLED']
+    RESERVED_PROPS = ['NAME', 'ENABLED', 'PREFIX']
 
-    def __init__(self, name, enabled):
+    def __init__(self, name, prefix, enabled):
         self.name = name
         self.enabled = enabled
         self.props = {}
-        self.prefix = None  # required
+        self.prefix = prefix
         self.listeners = []  # EngineListeners
 
     def tag(self, path):
@@ -89,8 +89,9 @@ class EnvironmentEngineManagerBuilder(EngineManagerBuilder):
                 enabled = False
                 if os.environ['ENGINE_{}_ENABLED'.format(engine_env_name)] is not None:
                     enabled = str2bool(os.environ['ENGINE_{}_ENABLED'.format(engine_env_name)])
+                prefix = os.environ['ENGINE_{}_PREFIX'.format(engine_env_name)]
                 engine_klass = self.get_class(engine_klass_name)
-                engine = engine_klass(engine_env_name, enabled)
+                engine = engine_klass(engine_env_name, prefix, enabled)
 
                 # Collect all the engine properties
                 prop_detect = re.compile('^ENGINE_{}_(?P<prop>[A-Z0-9_]*)'.format(engine_env_name))

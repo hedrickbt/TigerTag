@@ -15,5 +15,6 @@ class ConsoleStasher(Stasher):
     def stash(self, engine: Engine, path: str, tags: dict):
         print(f'path: {path}')
         print(f'engine: {engine.name}')
+        print(f'engine prefix: {engine.prefix}')
         print('tags:')
         print(yaml.safe_dump(tags))
