@@ -13,7 +13,7 @@ class TestEngine(unittest.TestCase):
         self.assertEqual(self.e.enabled, False)
 
     def test_tag_not_implemented(self):
-        self.assertRaises(NotImplementedError, self.e.tag, 'Not needed')
+        self.assertRaises(NotImplementedError, self.e.tag, 'path_ex', 'temp_ex', 'ext_id_ex')
 
 
 class TestEngineManager(unittest.TestCase):
@@ -31,9 +31,9 @@ class TestEngineManager(unittest.TestCase):
         self.assertRaisesRegex(
             NotImplementedError,
             'The {} engine has not implemented the tag method.'.format(self.e.name),
-            self.em.tag, 'Not needed')
+            self.em.tag, 'path_ex', 'temp_ex', 'ext_id_ex')
 
-    def _tag_stub(self, path):
+    def _tag_stub(self, path: str, temp: str, ext_id: str):
         pass
 
     def test_duplicate_prefix(self):
@@ -52,7 +52,8 @@ class TestEngineManager(unittest.TestCase):
         self.assertRaisesRegex(
             AttributeError,
             'The {} engine is missing the prefix attribute'.format(self.e.name),
-            self.em.tag, 'Not needed')
+            self.em.tag, 'path_ex', 'temp_ex', 'ext_id_ex')
+
 
 class TestEnvironmentEngineManagerBuilder(unittest.TestCase):
     def setUp(self):
@@ -71,4 +72,4 @@ class TestEnvironmentEngineManagerBuilder(unittest.TestCase):
     def test_tag_not_implemented(self):
         em = self.emb.build()
         em.engines['TEST'].prefix = 'ttt'
-        self.assertRaises(NotImplementedError, em.tag, 'Not needed')
+        self.assertRaises(NotImplementedError, em.tag, 'path_ex', 'temp_ex', 'ext_id_ex')

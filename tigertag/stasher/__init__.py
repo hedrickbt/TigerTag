@@ -16,7 +16,7 @@ class Stasher:
         self.enabled = enabled
         self.props = {}
 
-    def stash(self, engine: Engine, path: str, tags: dict):
+    def stash(self, engine: Engine, path: str, tags: dict, ext_id: str):
         raise NotImplementedError('The {} stasher has not implemented the stash method.'.format(self.name))
 
 
@@ -27,12 +27,12 @@ class StasherManager:
     def add(self, stasher):
         self.stashers[stasher.name] = stasher
 
-    def stash(self, engine: Engine, path: str, tags: dict):
+    def stash(self, engine: Engine, path: str, tags: dict, ext_id: str):
         if len(self.stashers) == 0:
             logger.warning('No stashers configured.  Please check your configuration')
         for stasher_name, stasher in self.stashers.items():
             if stasher.enabled:
-                stasher.stash(engine, path, tags)
+                stasher.stash(engine, path, tags, ext_id)
 
 
 class StasherManagerBuilder:

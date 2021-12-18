@@ -29,6 +29,6 @@ class TestConsoleStasher(unittest.TestCase):
         self.s = ConsoleStasher('console_stasher', True)
 
     def test_run(self):
-        with capture(self.s.stash, Engine('test_engine', 'tst', True), '/image.png', {'tag': 'hi'}) as output:
-            self.assertEqual('path: /image.png\nengine: test_engine\nengine prefix: tst\ntags:\ntag: hi\n\n', output)
+        with capture(self.s.stash, Engine('test_engine', 'tst', True), '/image.png', {'tag': 'hi'}, '99') as output:
+            self.assertEqual('path: /image.png\nengine: test_engine\nengine prefix: tst\next_id: 99\ntags:\ntag: hi\n\n', output)
 

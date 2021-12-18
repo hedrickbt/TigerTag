@@ -13,7 +13,7 @@ class TestStasher(unittest.TestCase):
         self.assertEqual(self.s.enabled, False)
 
     def test_stash_not_implemented(self):
-        self.assertRaises(NotImplementedError, self.s.stash, None, 'Does not matter', {})
+        self.assertRaises(NotImplementedError, self.s.stash, None, 'path_ex', {}, 'ext_id_ex')
 
 
 class TestStasherManager(unittest.TestCase):
@@ -33,8 +33,9 @@ class TestStasherManager(unittest.TestCase):
             'The {} stasher has not implemented the stash method.'.format(self.s.name),
             self.sm.stash,
             None,
-            'Does not matter',
-            {}
+            'path_ex',
+            {},
+            'ext_id_ex'
         )
 
 
@@ -53,4 +54,4 @@ class TestEnvironmentStasherManagerBuilder(unittest.TestCase):
 
     def test_stash_not_implemented(self):
         sm = self.smb.build()
-        self.assertRaises(NotImplementedError, sm.stash, None, 'Does not matter', {})
+        self.assertRaises(NotImplementedError, sm.stash, None, 'path_ex', {}, 'ext_id_ex')

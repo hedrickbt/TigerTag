@@ -161,7 +161,7 @@ class ImaggaEngine(Engine):
     def calc_tag_name(self, tag_name):
         return '{}_{}'.format(self.prefix, tag_name)
 
-    def tag(self, path, temp=None):
+    def tag(self, path: str, temp: str = None, ext_id: str = None):
         tag_path = path if temp is None else temp
         if 'API_KEY' not in self.props or 'API_SECRET' not in self.props:
             raise ArgumentException('You haven\'t set your API credentials.')
@@ -188,7 +188,7 @@ class ImaggaEngine(Engine):
             tag_response = TagInfo(path, {})
 
         for listener in self.listeners:
-            listener.on_tags(self, tag_response)
+            listener.on_tags(self, tag_response, ext_id)
         return tag_response
 
 

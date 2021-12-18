@@ -43,6 +43,7 @@ class PlexScanner(Scanner):
                 # print(f'\tphoto: {photo.title}')
 
                 path = photo.locations[0]
+                ext_id = photo.ratingKey
                 temp_photos = photo.download(tempfile.gettempdir())
                 temp_photo_path = temp_photos[0]
                 filename = os.path.basename(path)
@@ -53,7 +54,7 @@ class PlexScanner(Scanner):
                 else:
                     logger.info('Scanning {} temporarily at {}'.format(path, temp_photo_path))
                     file_hash = calc_hash(temp_photo_path)
-                    file_info = FileInfo(filename, path, file_hash, temp_photo_path)
+                    file_info = FileInfo(filename, path, file_hash, temp_photo_path, ext_id)
                     for listener in self.listeners:
                         listener.on_file(self, file_info)
                         if os.path.exists(temp_photo_path):

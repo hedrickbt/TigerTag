@@ -20,12 +20,12 @@ class Engine:
         self.prefix = prefix
         self.listeners = []  # EngineListeners
 
-    def tag(self, path):
+    def tag(self, path: str, temp: str = None, ext_id: str = None):
         raise NotImplementedError('The {} engine has not implemented the tag method.'.format(self.name))
 
 
 class EngineListener:
-    def on_tags(self, engine: Engine, tag_info: TagInfo):
+    def on_tags(self, engine: Engine, tag_info: TagInfo, ext_id: str):
         pass
 
 
@@ -37,7 +37,7 @@ class EngineManager:
     def add(self, engine):
         self.engines[engine.name] = engine
 
-    def tag(self, path):
+    def tag(self, path: str, temp: str = None, ext_id: str = None):
         prefixes = []
         if len(self.engines) == 0:
             logger.warning('No tag engines configured.  Please check your configuration')
@@ -51,7 +51,7 @@ class EngineManager:
                 engine.listeners = []
                 for engine_listener in self.listeners:
                     engine.listeners.append(engine_listener)
-                engine.tag(path)
+                engine.tag(path, temp, ext_id)
                 prefixes.append(engine.prefix)
 
 

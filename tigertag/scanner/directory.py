@@ -30,6 +30,6 @@ class DirectoryScanner(Scanner):
                 else:
                     logger.info('Scanning {}'.format(full_filename))
                     file_hash = calc_hash(full_filename)
-                    file_info = FileInfo(filename, full_filename, file_hash, None)
+                    file_info = FileInfo(filename, full_filename, file_hash, None, None)
                     for listener in self.listeners:
                         listener.on_file(self, file_info)

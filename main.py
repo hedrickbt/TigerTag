@@ -20,19 +20,25 @@ from tigertag.stasher import EnvironmentStasherManagerBuilder
 # SCANNER_DIRECTORY_NAME=tigertag.scanner.directory.DirectoryScanner
 # SCANNER_DIRECTORY_ENABLED=True
 # SCANNER_DIRECTORY_PATH=data/images/input
+
 # SCANNER_PLEX_NAME=tigertag.scanner.plex.PlexScanner
 # SCANNER_PLEX_ENABLED=True
 # SCANNER_PLEX_TOKEN=<VALUE>
 # SCANNER_PLEX_URL=<VALUE ex: http://127.0.0.1:32400>
 # SCANNER_PLEX_SECTION=<VALUE ex: TEST Family Photos>
 # ENGINE_IMAGGA_NAME=tigertag.engine.imagga.ImaggaEngine
-# ENGINE_IMAGGA_PREFIX=tti
+# ENGINE_IMAGGA_PREFIX=Tti
 # ENGINE_IMAGGA_ENABLED=True
 # ENGINE_IMAGGA_API_KEY=<VALUE>
 # ENGINE_IMAGGA_API_SECRET=<VALUE>
 # ENGINE_IMAGGA_API_URL=https://api.imagga.com/v2
 # STASHER_CONSOLE_NAME=tigertag.stasher.console.ConsoleStasher
 # STASHER_CONSOLE_ENABLED=True
+# STASHER_PLEX_NAME=tigertag.stasher.plex.PlexStasher
+# STASHER_PLEX_ENABLED=True
+# STASHER_PLEX_TOKEN=<VALUE>
+# STASHER_PLEX_URL=<VALUE ex: http://127.0.0.1:32400>
+# STASHER_PLEX_SECTION=<VALUE ex: TEST Family Photos>
 # DB_URL=sqlite:///tigertag.db
 MIN_CONFIDENCE = 30
 
@@ -44,7 +50,7 @@ stasher_manager: StasherManager = None
 persist: Persist = None
 
 
-def on_tags(engine: Engine, tag_info: TagInfo):
+def on_tags(engine: Engine, tag_info: TagInfo, ext_id: str):
     new_tags = dict(filter(lambda elem: elem[1]['confidence'] >= MIN_CONFIDENCE, tag_info.tags.items()))
     new_tag_info = TagInfo(tag_info.path, new_tags)
     FOUND_TAGS[tag_info.path] = new_tag_info
@@ -53,7 +59,7 @@ def on_tags(engine: Engine, tag_info: TagInfo):
         engine=engine.name,
         tags=new_tags
     )
-    stasher_manager.stash(engine, tag_info.path, new_tags)
+    stasher_manager.stash(engine, tag_info.path, new_tags, ext_id)
 
 
 def on_file(scanner: Scanner, file_info: FileInfo):
@@ -72,7 +78,7 @@ def on_file(scanner: Scanner, file_info: FileInfo):
             file_info.hash,
             temp_date_time
         )
-        engine_manager.tag(file_info.path)
+        engine_manager.tag(file_info.path, file_info.temp, file_info.ext_id)
 
 
 if __name__ == "__main__":
