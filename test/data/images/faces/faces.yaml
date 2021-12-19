@@ -1,0 +1,8 @@
+faces:
+  - tag: Roman
+    images:
+      - name: boy.jpg
+      - name: boy2.jpg
+  - tag: Poppy
+    images:
+      - name: girl.jpg
