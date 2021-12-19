@@ -28,7 +28,7 @@ class TestDirectoryScanner(unittest.TestCase):
     def test_run(self):
         self.s.scan()
 
-        self.assertEqual(4, len(self.found_files))
+        self.assertEqual(12, len(self.found_files))
         test_file_path = os.path.normpath(os.path.join(os.getcwd(), 'data', 'images', 'input', 'boy.jpg'))
         self.assertIn(test_file_path, self.found_files)
         file_info = self.found_files[test_file_path]

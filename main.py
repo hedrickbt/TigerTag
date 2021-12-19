@@ -40,6 +40,14 @@ from tigertag.stasher import EnvironmentStasherManagerBuilder
 # STASHER_PLEX_URL=<VALUE ex: http://127.0.0.1:32400>
 # STASHER_PLEX_SECTION=<VALUE ex: TEST Family Photos>
 # DB_URL=sqlite:///tigertag.db
+# ENGINE_COMPREFACE_NAME=tigertag.engine.compreface.ComprefaceEngine
+# ENGINE_COMPREFACE_PREFIX=ttf
+# ENGINE_COMPREFACE_ENABLED=True
+# ENGINE_COMPREFACE_API_KEY=<VALUE ex: 5b3448dc-f46...>
+# ENGINE_COMPREFACE_API_PORT=8000
+# ENGINE_COMPREFACE_API_URL=http://localhost
+# ENGINE_COMPREFACE_FACES_FOLDER=data/images/faces
+# ENGINE_COMPREFACE_FACES_CONFIG=data/images/faces/faces.yaml
 MIN_CONFIDENCE = 30
 
 logger = logging.getLogger(__name__)

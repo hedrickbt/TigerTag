@@ -10,7 +10,7 @@ logging.basicConfig(
 
 
 class TestImaggaEngine(unittest.TestCase):
-    def on_tags(self, engine: Engine, tag_info: TagInfo):
+    def on_tags(self, engine: Engine, tag_info: TagInfo, ext_id: str):
         self.found_tags[tag_info.path] = tag_info
 
     def setUp(self):

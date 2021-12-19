@@ -6,3 +6,4 @@ alembic-verify>=0.1.4
 plexapi>=4.7.2
 Pillow>=8.4.0
 PyYAML>=6.0
+compreface-sdk>=0.6.0
