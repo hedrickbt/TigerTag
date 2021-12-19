@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 #       bytes / W px / 24 bpp * 8 bits / 0.1 jpg comp = H px
 # ex: 5242880 / 5000 / 24     *	8      / 0.1	      = 3495.25333333333
 MAX_SHORT_SIDE = 1000
-MIN_CONFIDENCE = 70  # 0-100
+MIN_CONFIDENCE = 85  # 0-100
 
 
 class ComprefaceEngine(Engine):
