@@ -1,6 +1,8 @@
 import json
 import logging
 import os
+from requests.exceptions import ConnectionError
+from json.decoder import JSONDecodeError
 
 import yaml
 from compreface import CompreFace
@@ -77,7 +79,7 @@ class ComprefaceEngine(Engine):
                     try:
                         self.compre_face_collection.add(image_path=image_bytes, subject=face_tag)
                         success = True
-                    except json.decoder.JSONDecodeError:
+                    except (JSONDecodeError, ConnectionError):
                         logger.warning('Unable to upload face {} try {} of {}.'.format(face_image_file_name, attempt, self.tries))
                         attempt += 1
                 if success:
@@ -115,7 +117,7 @@ class ComprefaceEngine(Engine):
                 try:
                     tag_result = self.compre_recognition.recognize(image_path=image_bytes)
                     success = True
-                except json.decoder.JSONDecodeError:
+                except (JSONDecodeError, ConnectionError):
                     logger.warning('Unable to tag {} try {} of {}.'.format(path, attempt, self.tries))
                     attempt += 1
             if attempt > self.tries:
