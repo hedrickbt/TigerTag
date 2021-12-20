@@ -63,13 +63,28 @@ class ComprefaceEngine(Engine):
 
         for face in self.faces_config['faces']:
             for image in face['images']:
-                uploaded += 1
                 face_image_file_name = os.path.normpath(os.path.join(
                     self.faces_folder, image['name']
                 ))
                 face_tag = face['tag']
                 logger.debug(f'Uploading face {face_image_file_name} for {face_tag}')
-                self.compre_face_collection.add(image_path=face_image_file_name, subject=face_tag)
+                with open(face_image_file_name, 'rb') as image_file_obj:
+                    image_bytes = image_file_obj.read()
+
+                attempt = 1
+                success = False
+                while attempt <= self.tries and not success:
+                    try:
+                        self.compre_face_collection.add(image_path=image_bytes, subject=face_tag)
+                        success = True
+                    except json.decoder.JSONDecodeError:
+                        logger.warning('Unable to upload face {} try {} of {}.'.format(face_image_file_name, attempt, self.tries))
+                        attempt += 1
+                if success:
+                    uploaded += 1
+                else:
+                    logger.warning('Failed to upload face {} after {} tries.'.format(face_image_file_name, self.tries))
+
         self.uploaded_faces = True
         subjects = sorted(self.compre_subjects.list()['subjects'])
         return {
@@ -92,8 +107,8 @@ class ComprefaceEngine(Engine):
             # will stop.
             # tag_result = self.compre_recognition.recognize(image_path=scaled_image_path)
             image_bytes: bytes = None
-            with open(scaled_image_path, 'rb') as image:
-                image_bytes = image.read()
+            with open(scaled_image_path, 'rb') as image_file_obj:
+                image_bytes = image_file_obj.read()
             attempt = 1
             success = False
             while attempt <= self.tries and not success:
