@@ -57,18 +57,18 @@ class ImaggaEngine(Engine):
                 #        "type": "success"
                 #      }
                 #    }
-                logging.debug(f'Response status: {content_response.status_code}')
+                logger.debug(f'Response status: {content_response.status_code}')
                 if content_response.status_code == 504 or 'result' not in content_response.json():
                     if current_try >= self.tries:
-                        logging.warning('Failed to upload {} as {} after {} tries.'.format(image_path, scaled_image_path, self.tries))
+                        logger.warning('Failed to upload {} as {} after {} tries.'.format(image_path, scaled_image_path, self.tries))
                         raise KeyError('result not found in {}'.format(content_response))
                     else:
-                        logging.warning('Unable to upload {} as {} try {} of {}.'.format(
+                        logger.warning('Unable to upload {} as {} try {} of {}.'.format(
                             image_path, scaled_image_path, current_try, self.tries))
                         time.sleep(current_try * 2)
                         current_try = current_try + 1
                 else:
-                    logging.debug('Uploaded {} as {} after {} tries.'.format(
+                    logger.debug('Uploaded {} as {} after {} tries.'.format(
                         image_path, scaled_image_path, current_try))
                     success = True
                     uploaded_file = content_response.json()['result']
@@ -97,19 +97,19 @@ class ImaggaEngine(Engine):
                 params=tagging_query
             )
 
-            logging.debug(f'Response status: {tagging_response.status_code}')
+            logger.debug(f'Response status: {tagging_response.status_code}')
             tagging_json = tagging_response.json()
             if tagging_response.status_code == 504 or 'result' not in tagging_json or \
                     'tags' not in tagging_json['result']:
                 if current_try >= self.tries:
-                    logging.warning('Failed to tag {} after {} tries.'.format(image, self.tries))
+                    logger.warning('Failed to tag {} after {} tries.'.format(image, self.tries))
                     raise KeyError('result not found in {}'.format(tagging_response))
                 else:
-                    logging.warning('Unable to tag {} try {} of {}.'.format(image, current_try, self.tries))
+                    logger.warning('Unable to tag {} try {} of {}.'.format(image, current_try, self.tries))
                     time.sleep(current_try * 2)
                     current_try = current_try + 1
             else:
-                logging.debug('Tagged {} after {} tries.'.format(image, current_try))
+                logger.debug('Tagged {} after {} tries.'.format(image, current_try))
                 success = True
                 result = tagging_json
         return result
@@ -202,9 +202,9 @@ def main():
     sl.on_file = lambda scanner, file_info: en.tag(file_info.path)
     s.listeners.append(sl)
 
-    logging.info('Tagging images started')
+    logger.info('Tagging images started')
     s.scan()
-    logging.info('Tagging images complete')
+    logger.info('Tagging images complete')
 
 
 if __name__ == '__main__':

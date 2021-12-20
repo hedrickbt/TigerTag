@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -84,13 +85,31 @@ class ComprefaceEngine(Engine):
 
         logger.info('Tagging {}'.format(tag_path))
         scaled_image_path = create_scaled_image(tag_path, MAX_SHORT_SIDE)
+        tag_result = None
         try:
-            tag_result = self.compre_recognition.recognize(image_path=scaled_image_path)
+            # This call below can leave the file open if there is an exception - which will
+            # prevent the os.remove call from completing, throw an exception, and the application
+            # will stop.
+            # tag_result = self.compre_recognition.recognize(image_path=scaled_image_path)
+            image_bytes: bytes = None
+            with open(scaled_image_path, 'rb') as image:
+                image_bytes = image.read()
+            attempt = 1
+            success = False
+            while attempt <= self.tries and not success:
+                try:
+                    tag_result = self.compre_recognition.recognize(image_path=image_bytes)
+                    success = True
+                except json.decoder.JSONDecodeError:
+                    logger.warning('Unable to tag {} try {} of {}.'.format(path, attempt, self.tries))
+                    attempt += 1
+            if attempt > self.tries:
+                logger.warning('Failed to tag {} after {} tries.'.format(path, self.tries))
         finally:
             os.remove(scaled_image_path)
 
         tag_response: TagInfo = None
-        if 'result' in tag_result:
+        if tag_result is not None and 'result' in tag_result:
             tags = {}
             for result in tag_result['result']:
                 if 'subjects' in result:
