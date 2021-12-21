@@ -1,8 +1,9 @@
 import logging
-import os
+import smtplib
 
 from tigertag.notifier import Notifier
 from tigertag.notifier import NotificationInfo
+from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
 
@@ -14,33 +15,30 @@ class EmailNotifier(Notifier):
         self.to = None
         self.server = None
         self.port = None
-        self.start_tls = False
+        self.ssl = False
+        self.starttls = False
 
-    def setup(self):
+    def _setup(self):
         if self.server is None:
             self.from_address = self.get_prop('FROM')
-            if self.from_address is None and 'FROM' in self.props:
-                self.from_address = self.props['PATH']
-            if self.path is None:
-                raise ValueError('The path has not been set for the {} ({}.{})'.format(
-                    self.name, __name__, type(self).__name__))
+            self.to = self.get_prop('TO')
+            self.server = self.get_prop('SERVER')
+            self.port = int(self.get_prop('PORT'))
+            self.ssl = str2bool(self.get_prop('SSL'))
+            self.starttls = str2bool(self.get_prop('STARTTLS'))
 
     def notify(self, notification: NotificationInfo):
-        if self.path is None and 'PATH' in self.props:
-            self.path = self.props['PATH']
-        if self.path is None:
-            raise ValueError('The path has not been set for the {} ({}.{})'.format(
-                self.name, __name__, type(self).__name__))
-        self.path = os.path.abspath(self.path)
-        for root, directories, filenames in os.walk(self.path):
-            for filename in filenames:
-                full_filename = os.path.normpath(os.path.join(root, filename))
-                image_type = imghdr.what(full_filename)
-                if image_type is None:
-                    logger.debug('Ignoring {}'.format(full_filename))
-                else:
-                    logger.info('Scanning {}'.format(full_filename))
-                    file_hash = calc_hash(full_filename)
-                    file_info = FileInfo(filename, full_filename, file_hash, None, None)
-                    for listener in self.listeners:
-                        listener.on_file(self, file_info)
+        self._setup()
+        if self.ssl:
+            server = smtplib.SMTP_SSL(self.server, self.port)
+        else:
+            server = smtplib.SMTP(self.server, self.port)
+        server.ehlo()
+        if self.starttls:
+            server.starttls()
+        if self.get_prop('USERNAME', '') != '' and self.get_prop('PASSWORD', '') != '':
+            server.login(self.get_prop('USERNAME'), self.get_prop('PASSWORD'))
+        message = 'Subject: {}\n\n{}'.format(notification.subject, notification.message)
+        server.sendmail(self.from_address, self.to, message)
+
+        logger.info(f'Notification sent {notification.subject}')

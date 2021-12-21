@@ -1,6 +1,7 @@
 import datetime
 import logging
 import sys
+import traceback
 
 from tigertag.db import EnvironmentDbEngineBuilder
 from tigertag.db import Persist
@@ -16,6 +17,9 @@ from tigertag.scanner import ScannerListener
 from tigertag.scanner import ScannerManager
 from tigertag.stasher import StasherManager
 from tigertag.stasher import EnvironmentStasherManagerBuilder
+from tigertag.notifier import NotifierManager
+from tigertag.notifier import EnvironmentNotifierManagerBuilder
+from tigertag.notifier import NotificationInfo
 
 # SCANNER_DIRECTORY_NAME=tigertag.scanner.directory.DirectoryScanner
 # SCANNER_DIRECTORY_ENABLED=True
@@ -48,6 +52,18 @@ from tigertag.stasher import EnvironmentStasherManagerBuilder
 # ENGINE_COMPREFACE_API_URL=http://localhost
 # ENGINE_COMPREFACE_FACES_FOLDER=data/images/faces
 # ENGINE_COMPREFACE_FACES_CONFIG=data/images/faces/faces.yaml
+# NOTIFIER_EMAIL_NAME=tigertag.notifier.email.EmailNotifier
+# NOTIFIER_EMAIL_ENABLED=True
+# NOTIFIER_EMAIL_FROM=<ex: your-from-address@gmail.com>
+# NOTIFIER_EMAIL_TO=<ex: your-to-address@gmail.com>
+# NOTIFIER_EMAIL_SERVER=<ex: smtp.gmail.com>
+# NOTIFIER_EMAIL_PORT=<ex: 587>
+# NOTIFIER_EMAIL_SSL=<ex: False>
+# NOTIFIER_EMAIL_STARTTLS=<ex: True>
+# NOTIFIER_EMAIL_USERNAME=<ex: your-from-address@gmail.com>
+# NOTIFIER_EMAIL_PASSWORD=<email account password>
+
+
 MIN_CONFIDENCE = 30
 
 logger = logging.getLogger(__name__)
@@ -90,29 +106,40 @@ def on_file(scanner: Scanner, file_info: FileInfo):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        stream=sys.stderr,
-        level=logging.DEBUG,
-        format='%(asctime)s %(levelname)-8s %(name)s : %(funcName)s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S')
+    nmb = EnvironmentNotifierManagerBuilder(NotifierManager)
+    nm = nmb.build()
 
-    deb = EnvironmentDbEngineBuilder()
-    de = deb.build()
-    persist = Persist(de)
+    try:
+        logging.basicConfig(
+            stream=sys.stderr,
+            level=logging.DEBUG,
+            format='%(asctime)s %(levelname)-8s %(name)s : %(funcName)s | %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S')
 
-    el = EngineListener()
-    el.on_tags = on_tags
-    emb = EnvironmentEngineManagerBuilder(EngineManager)
-    engine_manager = emb.build()
-    engine_manager.listeners.append(el)
+        deb = EnvironmentDbEngineBuilder()
+        de = deb.build()
+        persist = Persist(de)
 
-    stmb = EnvironmentStasherManagerBuilder(StasherManager)
-    stasher_manager = stmb.build()
+        el = EngineListener()
+        el.on_tags = on_tags
+        emb = EnvironmentEngineManagerBuilder(EngineManager)
+        engine_manager = emb.build()
+        engine_manager.listeners.append(el)
 
-    sl = ScannerListener()
-    sl.on_file = on_file
-    smb = EnvironmentScannerManagerBuilder(ScannerManager)
-    sm = smb.build()
-    sm.listeners.append(sl)
+        stmb = EnvironmentStasherManagerBuilder(StasherManager)
+        stasher_manager = stmb.build()
 
-    sm.scan()
+        sl = ScannerListener()
+        sl.on_file = on_file
+        smb = EnvironmentScannerManagerBuilder(ScannerManager)
+        sm = smb.build()
+        sm.listeners.append(sl)
+
+        sm.scan()
+    except Exception as e:
+        nm.notify(NotificationInfo(
+            'Exception in TigerTag',
+            traceback.format_exc()
+        ))
+        logger.error(e)
+        raise e
