@@ -8,3 +8,4 @@ test/data/images/output
 .idea
 *.pyc
 run.bat
+run-local.bat

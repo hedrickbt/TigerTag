@@ -1,0 +1,47 @@
+REM You will need to have done the following first
+REM python -m venv .venv
+REM .venv\scripts\activate.bat
+REM pip install -r requirements.txt
+REM deactivate
+
+set SCANNER_PLEX_NAME=tigertag.scanner.plex.PlexScanner
+set SCANNER_PLEX_ENABLED=True
+set SCANNER_PLEX_TOKEN=<plex token - ex: xsP-L...>
+set SCANNER_PLEX_URL=http://127.0.0.1:32400
+set SCANNER_PLEX_SECTION=<plex section - ex: Photos>
+REM set ENGINE_IMAGGA_NAME=tigertag.engine.imagga.ImaggaEngine
+REM set ENGINE_IMAGGA_PREFIX=tti
+REM set ENGINE_IMAGGA_ENABLED=True
+REM set ENGINE_IMAGGA_API_KEY=<imagga api key - ex: acc_9...>
+REM set ENGINE_IMAGGA_API_SECRET=<imagga api secret - ex: 3e0...>
+REM set ENGINE_IMAGGA_API_URL=https://api.imagga.com/v2
+set STASHER_CONSOLE_NAME=tigertag.stasher.console.ConsoleStasher
+set STASHER_CONSOLE_ENABLED=True
+set STASHER_PLEX_NAME=tigertag.stasher.plex.PlexStasher
+set STASHER_PLEX_ENABLED=True
+set STASHER_PLEX_TOKEN=<plex token - ex: xsP-L...>
+set STASHER_PLEX_URL=http://127.0.0.1:32400
+set STASHER_PLEX_SECTION=<plex section - ex: Photos>
+set DB_URL=sqlite:///tigertag.db
+set ENGINE_COMPREFACE_NAME=tigertag.engine.compreface.ComprefaceEngine
+set ENGINE_COMPREFACE_PREFIX=ttf
+set ENGINE_COMPREFACE_ENABLED=True
+set ENGINE_COMPREFACE_API_KEY=<compreface recognition service token - ex: 3a9990df-ec...>
+set ENGINE_COMPREFACE_API_PORT=8000
+set ENGINE_COMPREFACE_API_URL=http://localhost
+set ENGINE_COMPREFACE_FACES_FOLDER=data/images/faces
+set ENGINE_COMPREFACE_FACES_CONFIG=data/images/faces/faces.yaml
+set NOTIFIER_EMAIL_NAME=tigertag.notifier.email.EmailNotifier
+set NOTIFIER_EMAIL_ENABLED=True
+set NOTIFIER_EMAIL_FROM=<ex: your-from-mail@gmail.com>
+set NOTIFIER_EMAIL_TO=<ex: your-to-mail@gmail.com>
+set NOTIFIER_EMAIL_SERVER=smtp.gmail.com
+set NOTIFIER_EMAIL_PORT=587
+set NOTIFIER_EMAIL_SSL=False
+set NOTIFIER_EMAIL_STARTTLS=True
+set NOTIFIER_EMAIL_USERNAME=<ex: your-from-mail@gmail.com>
+set NOTIFIER_EMAIL_PASSWORD=<ex: your email account password>
+
+call .venv\scripts\activate.bat
+call python main.py
+call deactivate
