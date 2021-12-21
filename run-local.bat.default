@@ -2,6 +2,7 @@ REM You will need to have done the following first
 REM python -m venv .venv
 REM .venv\scripts\activate.bat
 REM pip install -r requirements.txt
+REM alembic upgrade head
 REM deactivate
 
 set SCANNER_PLEX_NAME=tigertag.scanner.plex.PlexScanner
