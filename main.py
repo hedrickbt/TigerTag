@@ -1,5 +1,6 @@
 import datetime
 import logging
+import logging.handlers
 import sys
 import traceback
 
@@ -20,6 +21,7 @@ from tigertag.stasher import EnvironmentStasherManagerBuilder
 from tigertag.notifier import NotifierManager
 from tigertag.notifier import EnvironmentNotifierManagerBuilder
 from tigertag.notifier import NotificationInfo
+from tigertag.notifier.email import EmailNotifier
 
 # SCANNER_DIRECTORY_NAME=tigertag.scanner.directory.DirectoryScanner
 # SCANNER_DIRECTORY_ENABLED=True
@@ -69,21 +71,25 @@ MIN_CONFIDENCE = 30
 logger = logging.getLogger(__name__)
 FOUND_TAGS: dict[str, TagInfo] = {}
 FOUND_FILES: dict[str, FileInfo] = {}
+notifier_manager: NotifierManager = None
 engine_manager: EngineManager = None
 stasher_manager: StasherManager = None
 persist: Persist = None
 
 
 def on_tags(engine: Engine, tag_info: TagInfo, ext_id: str):
-    new_tags = dict(filter(lambda elem: elem[1]['confidence'] >= MIN_CONFIDENCE, tag_info.tags.items()))
-    new_tag_info = TagInfo(tag_info.path, new_tags)
-    FOUND_TAGS[tag_info.path] = new_tag_info
-    persist.set_resource(
-        tag_info.path,
-        engine=engine.name,
-        tags=new_tags
-    )
-    stasher_manager.stash(engine, tag_info.path, new_tags, ext_id)
+    if tag_info.tags is not None:
+        new_tags = dict(filter(lambda elem: elem[1]['confidence'] >= MIN_CONFIDENCE, tag_info.tags.items()))
+        new_tag_info = TagInfo(tag_info.path, new_tags)
+        FOUND_TAGS[tag_info.path] = new_tag_info
+        persist.set_resource(
+            tag_info.path,
+            engine=engine.name,
+            tags=new_tags
+        )
+        stasher_manager.stash(engine, tag_info.path, new_tags, ext_id)
+    else:
+        persist.set_resource_rescan(tag_info.path)
 
 
 def on_file(scanner: Scanner, file_info: FileInfo):
@@ -105,9 +111,29 @@ def on_file(scanner: Scanner, file_info: FileInfo):
         engine_manager.tag(file_info.path, file_info.temp, file_info.ext_id)
 
 
+def add_smtp_logging_handler():
+    email_notifier: EmailNotifier = notifier_manager.find_type(EmailNotifier)
+    if email_notifier is not None:
+        temp_credentials = email_notifier.get_credentials()
+        credentials = None
+        if temp_credentials is not None:
+            credentials = (temp_credentials.username, temp_credentials.password)
+        smtp_handler = logging.handlers.SMTPHandler(
+            mailhost=(email_notifier.get_prop('SERVER'), email_notifier.get_prop('PORT')),
+            fromaddr=email_notifier.get_prop('FROM'),
+            toaddrs=email_notifier.get_prop('TO'),
+            subject='TigerTag Error',
+            credentials=credentials,
+            secure=())
+        smtp_handler.setLevel(logging.ERROR)
+        logging.getLogger().addHandler(smtp_handler)  # add global smtp handler
+        # logger.addHandler(smtp_handler)  # this would only add the handler to the logger in main.py
+
+
 if __name__ == "__main__":
     nmb = EnvironmentNotifierManagerBuilder(NotifierManager)
-    nm = nmb.build()
+    notifier_manager = nmb.build()
+    notifier_manager.notify(NotificationInfo('TigerTag', 'Scan Started'))
 
     try:
         logging.basicConfig(
@@ -115,6 +141,7 @@ if __name__ == "__main__":
             level=logging.DEBUG,
             format='%(asctime)s %(levelname)-8s %(name)s : %(funcName)s | %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S')
+        add_smtp_logging_handler()
 
         deb = EnvironmentDbEngineBuilder()
         de = deb.build()
@@ -136,10 +163,8 @@ if __name__ == "__main__":
         sm.listeners.append(sl)
 
         sm.scan()
+
+        notifier_manager.notify(NotificationInfo('TigerTag', 'Scan Complete'))
     except Exception as e:
-        nm.notify(NotificationInfo(
-            'Exception in TigerTag',
-            traceback.format_exc()
-        ))
-        logger.error(e)
+        logger.error(f'{e}\n{traceback.format_exc()}')
         raise e

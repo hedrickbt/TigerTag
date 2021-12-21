@@ -104,7 +104,7 @@ class ImaggaEngine(Engine):
                 else:
                     logger.warning('Unable to tag {} try {} of {}.'.format(image, current_try, self.tries))
                     time.sleep(current_try * 2)
-                    current_try = current_try + 1
+                    current_try += 1
             else:
                 logger.debug('Tagged {} after {} tries.'.format(image, current_try))
                 success = True
@@ -125,7 +125,7 @@ class ImaggaEngine(Engine):
         upload_id = self.upload_image(auth, tag_path)
         tag_result = self.imagga_tag_api(auth, upload_id, True, verbose, language)
 
-        tag_response: TagInfo = None
+        tag_response: TagInfo = TagInfo(path, None)
         if 'result' in tag_result and 'tags' in tag_result['result']:
             tags = {}
             for tag_item in tag_result['result']['tags']:
@@ -134,8 +134,6 @@ class ImaggaEngine(Engine):
                     'confidence': tag_item['confidence']
                 }
             tag_response = TagInfo(path, tags)
-        else:
-            tag_response = TagInfo(path, {})
 
         for listener in self.listeners:
             listener.on_tags(self, tag_response, ext_id)

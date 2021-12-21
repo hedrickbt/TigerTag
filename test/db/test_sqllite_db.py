@@ -202,6 +202,20 @@ class TestPersist(BaseSqlite):
         resource = self.p.get_resource_by_id(1)
         self.assertEqual('changed', resource['hashval'])
 
+    def test_set_resource_rescan(self):
+        temp_date_time = datetime.datetime.now()
+        self.p.set_resource(
+            'data/images/input/smile.png',
+            'smile.png',
+            '3e44cfaa9a914f1312d157130810300f',
+            temp_date_time,
+        )
+        self.p.set_resource_rescan(
+            'data/images/input/smile.png'
+        )
+        resource = self.p.get_resource_by_id(1)
+        self.assertEqual('rescan', resource['hashval'])
+
     def test_get_resources_by_location(self):
         temp_date_time = datetime.datetime.now()
         self.p.set_resource(

@@ -37,6 +37,12 @@ class NotifierManager:
             if notifier.enabled:
                 notifier.notify(notification)
 
+    def find_type(self, class_type):
+        for notifier_name, notifier in self.notifiers.items():
+            if isinstance(notifier, class_type):
+                return notifier
+        return None
+
 
 class NotifierManagerBuilder:
     def __init__(self, notifier_manager_klass):

@@ -139,6 +139,16 @@ class Persist:
 
             return Persist._row_to_dict(resource)
 
+    def set_resource_rescan(self, location):
+        with self.engine.session() as session, session.begin():
+            existing_resource = session.execute(select(Resource).filter_by(location=location)).one_or_none()
+            if existing_resource is None:
+                raise ValueError(f'Existing resource not found: {location}')
+            logger.debug('Set existing resource to rescan {}'.format(location))
+            resource = existing_resource.Resource
+            resource.hashval = 'rescan'
+            return Persist._row_to_dict(resource)
+
     def get_resource_by_id(self, id):
         with self.engine.session() as session, session.begin():
             row = session.query(Resource).get(id)

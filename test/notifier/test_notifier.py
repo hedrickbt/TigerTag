@@ -26,6 +26,14 @@ class TestNotifierManager(unittest.TestCase):
         self.assertIn('test_notifier_2', self.sm.notifiers)
         self.assertEqual(self.s, self.sm.notifiers['test_notifier_2'])
 
+    def test_find_type(self):
+        found_instance = self.sm.find_type(Notifier)
+        self.assertIsNotNone(found_instance)
+
+    def test_find_type_fail(self):
+        found_instance = self.sm.find_type(TestNotifier)
+        self.assertIsNone(found_instance)
+
     def test_notify_not_implemented(self):
         self.assertRaisesRegex(
             NotImplementedError,

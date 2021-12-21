@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import traceback
 from requests.exceptions import ConnectionError
 from json.decoder import JSONDecodeError
 
@@ -95,58 +96,67 @@ class ComprefaceEngine(Engine):
         }
 
     def tag(self, path: str, temp: str = None, ext_id: str = None):
-        if not self.uploaded_faces:
-            self.delete_all_faces()
-            self.upload_faces()
-        tag_path = path if temp is None else temp
-
-        logger.info('Tagging {}'.format(tag_path))
-        scaled_image_path = create_scaled_image(tag_path, MAX_SHORT_SIDE)
-        tag_result = None
+        tag_response: TagInfo = TagInfo(path, None)
         try:
-            # This call below can leave the file open if there is an exception - which will
-            # prevent the os.remove call from completing, throw an exception, and the application
-            # will stop.
-            # tag_result = self.compre_recognition.recognize(image_path=scaled_image_path)
-            image_bytes: bytes = None
-            with open(scaled_image_path, 'rb') as image_file_obj:
-                image_bytes = image_file_obj.read()
-            attempt = 1
-            success = False
-            while attempt <= self.tries and not success:
-                try:
-                    tag_result = self.compre_recognition.recognize(image_path=image_bytes)
-                    success = True
-                except (JSONDecodeError, ConnectionError):
-                    logger.warning('Unable to tag {} try {} of {}.'.format(path, attempt, self.tries))
-                    attempt += 1
-            if attempt > self.tries:
-                logger.warning('Failed to tag {} after {} tries.'.format(path, self.tries))
-        finally:
-            os.remove(scaled_image_path)
+            if not self.uploaded_faces:
+                self.delete_all_faces()
+                self.upload_faces()
+            tag_path = path if temp is None else temp
 
-        tag_response: TagInfo = None
-        if tag_result is not None and 'result' in tag_result:
-            tags = {}
-            for result in tag_result['result']:
-                if 'subjects' in result:
-                    for subject in result['subjects']:
-                        new_tag = self.calc_tag_name(subject['subject'])
-                        confidence = subject['similarity'] * 100  # 0-100 instead of 0-1
-                        if confidence > self.min_confidence:
-                            if new_tag in tags:
-                                if confidence > tags[new_tag]['confidence']:
-                                    tags[new_tag]['confidence'] = confidence
+            logger.info('Tagging {}'.format(tag_path))
+            scaled_image_path = create_scaled_image(tag_path, MAX_SHORT_SIDE)
+            tag_result = None
+            try:
+                # This call below can leave the file open if there is an exception - which will
+                # prevent the os.remove call from completing, throw an exception, and the application
+                # will stop.
+                # tag_result = self.compre_recognition.recognize(image_path=scaled_image_path)
+                image_bytes: bytes = None
+                with open(scaled_image_path, 'rb') as image_file_obj:
+                    image_bytes = image_file_obj.read()
+                attempt = 1
+                success = False
+                while attempt <= self.tries and not success:
+                    try:
+                        tag_result = self.compre_recognition.recognize(image_path=image_bytes)
+                        success = True
+                    except (JSONDecodeError, ConnectionError):
+                        logger.warning('Unable to tag {} try {} of {}.'.format(path, attempt, self.tries))
+                        attempt += 1
+                if attempt > self.tries:
+                    logger.warning('Failed to tag {} after {} tries.'.format(path, self.tries))
+            finally:
+                os.remove(scaled_image_path)
+
+            if tag_result is not None and 'result' in tag_result:
+                tags = {}
+                for result in tag_result['result']:
+                    if 'subjects' in result:
+                        for subject in result['subjects']:
+                            new_tag = self.calc_tag_name(subject['subject'])
+                            confidence = subject['similarity'] * 100  # 0-100 instead of 0-1
+                            if confidence > self.min_confidence:
+                                if new_tag in tags:
+                                    if confidence > tags[new_tag]['confidence']:
+                                        tags[new_tag]['confidence'] = confidence
+                                else:
+                                    tags[new_tag] = {
+                                        'confidence': confidence
+                                    }
                             else:
-                                tags[new_tag] = {
-                                    'confidence': confidence
-                                }
-                        else:
-                            logger.debug(f'Ignoring {new_tag} tag due to {confidence} confidence which is '
-                                         f'lower than {self.min_confidence} for {path}.')
-            tag_response = TagInfo(path, tags)
-        else:
-            tag_response = TagInfo(path, {})
+                                logger.debug(f'Ignoring {new_tag} tag due to {confidence} confidence which is '
+                                             f'lower than {self.min_confidence} for {path}.')
+                tag_response = TagInfo(path, tags)
+            else:
+                if 'message' in tag_result and 'no face is found' in tag_result['message'].lower():
+                    tag_response = TagInfo(path, {})
+        except OSError as e:
+            if str(e).startswith('image file is truncated'):
+                logger.error(
+                    f'Non-terminating error.\nFailed to tag {path}.\n\n{e}\n{traceback.format_exc()}'
+                )
+            else:
+                raise e
 
         for listener in self.listeners:
             listener.on_tags(self, tag_response, ext_id)
