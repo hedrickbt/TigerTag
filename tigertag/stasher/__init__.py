@@ -2,13 +2,14 @@ import logging
 import os
 import re
 
+from tigertag import Pluggable
 from tigertag.util import str2bool
 from tigertag.engine import Engine
 
 logger = logging.getLogger(__name__)
 
 
-class Stasher:
+class Stasher(Pluggable):
     RESERVED_PROPS = ['NAME', 'ENABLED']
 
     def __init__(self, name, enabled):

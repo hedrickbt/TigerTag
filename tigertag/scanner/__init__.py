@@ -3,6 +3,7 @@ import os
 import re
 
 from collections import namedtuple
+from tigertag import Pluggable
 from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 FileInfo = namedtuple('FileInfo', 'name path hash temp ext_id')
 
 
-class Scanner:
+class Scanner(Pluggable):
     RESERVED_PROPS = ['NAME', 'ENABLED']
 
     def __init__(self, name, enabled):

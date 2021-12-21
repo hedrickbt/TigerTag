@@ -1,16 +1,16 @@
 import logging
 import os
-import sqlalchemy
-from sqlalchemy import create_engine, select, delete, and_
-from sqlalchemy import MetaData
+
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
+from tigertag import Pluggable
 from tigertag.db.models import *
 
 logger = logging.getLogger(__name__)
 
 
-class DbEngine:
+class DbEngine(Pluggable):
     RESERVED_PROPS = ['DB_URL']
 
     def __init__(self, db_url):
@@ -44,8 +44,7 @@ class EnvironmentDbEngineBuilder(DbEngineBuilder):
         if 'DB_URL' in os.environ:
             db_url = os.environ.get('DB_URL')
             return DbEngine(db_url)
-        else:
-            raise ValueError("DB_URL environment variable missing.")
+        raise ValueError("DB_URL environment variable missing.")
 
 
 class Persist:

@@ -7,6 +7,7 @@ import time
 import requests
 from requests.auth import HTTPBasicAuth
 
+from tigertag import ArgumentException
 from tigertag.engine import Engine
 from tigertag.engine import EngineListener
 from tigertag.engine import TagInfo
@@ -17,10 +18,6 @@ from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
 MAX_SHORT_SIDE = 300
-
-
-class ArgumentException(Exception):
-    pass
 
 
 class ImaggaEngine(Engine):

@@ -3,6 +3,7 @@ import os
 import re
 from collections import namedtuple
 
+from tigertag import Pluggable
 from tigertag.util import str2bool
 
 logger = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 TagInfo = namedtuple('TagInfo', 'path tags')
 
 
-class Engine:
+class Engine(Pluggable):
     RESERVED_PROPS = ['NAME', 'ENABLED', 'PREFIX']
 
     def __init__(self, name, prefix, enabled):
@@ -22,15 +23,6 @@ class Engine:
 
     def tag(self, path: str, temp: str = None, ext_id: str = None):
         raise NotImplementedError('The {} engine has not implemented the tag method.'.format(self.name))
-
-    def get_prop(self, prop_name: str, default=None, additional_message=''):
-        if prop_name not in self.props:
-            if default is None:
-                raise ArgumentException(f'You haven\'t set your {prop_name}.  {additional_message}')
-            else:
-                return default
-        else:
-            return self.props[prop_name]
 
     def calc_tag_name(self, tag_name):
         return '{}_{}'.format(self.prefix, tag_name)
