@@ -151,7 +151,8 @@ class ComprefaceEngine(Engine):
                 if 'message' in tag_result and 'no face is found' in tag_result['message'].lower():
                     tag_response = TagInfo(path, {})
         except OSError as e:
-            if str(e).startswith('image file is truncated'):
+            if str(e).lower().startswith('image file is truncated') or \
+               str(e).lower().startswith('broken data stream'):
                 logger.error(
                     f'Non-terminating error.\nFailed to tag {path}.\n\n{e}\n{traceback.format_exc()}'
                 )
