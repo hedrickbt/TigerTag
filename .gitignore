@@ -7,3 +7,4 @@ test/tigertag_demo.db
 test/data/images/output
 .idea
 *.pyc
+run.bat
