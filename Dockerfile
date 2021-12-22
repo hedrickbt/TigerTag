@@ -13,7 +13,7 @@ FROM python:3.10-slim-bullseye
 RUN apt-get update
 
 WORKDIR /app
-ADD alembic.ini main.py LICENSE README.txt requirements.txt /app/
+ADD alembic.ini main.py LICENSE README.txt requirements.txt version.txt /app/
 ADD alembic /app/alembic
 ADD tigertag /app/tigertag
 ADD entrypoint.sh /scripts/entrypoint.sh
