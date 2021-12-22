@@ -215,6 +215,7 @@ class TestPersist(BaseSqlite):
         )
         resource = self.p.get_resource_by_id(1)
         self.assertEqual('rescan', resource['hashval'])
+        self.assertLess(temp_date_time, resource['last_indexed'] )
 
     def test_get_resources_by_location(self):
         temp_date_time = datetime.datetime.now()

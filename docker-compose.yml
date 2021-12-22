@@ -1,0 +1,73 @@
+version: '3.4'
+
+# Run
+# docker-compose up -d
+
+# View logs/progress
+# docker-compose logs -f tigertag
+
+# Attach to running container
+# docker-compose exec tigertag bash
+
+# Stop in the middle of work - but leaves volumes alone
+# docker-compose stop
+
+
+# Clean up - be careful, this will remove the sqlitedb that track what was scanned as a result
+#  everything will be re-scanned next time
+# docker-compose down
+
+volumes:
+  tigertag-db:
+
+services:
+  tigertag:
+    image: hedrickbt/tigertag:${VERSION}
+    restart: "no"
+    container_name: "tigertag"
+    environment:
+      - SCANNER_PLEX_NAME=${SCANNER_PLEX_NAME}
+      - SCANNER_PLEX_ENABLED=${SCANNER_PLEX_ENABLED}
+      - SCANNER_PLEX_TOKEN=${SCANNER_PLEX_TOKEN}
+      - SCANNER_PLEX_URL=${SCANNER_PLEX_URL}
+      - SCANNER_PLEX_SECTION=${SCANNER_PLEX_SECTION}
+#      - ENGINE_IMAGGA_NAME=${ENGINE_IMAGGA_NAME}
+#      - ENGINE_IMAGGA_PREFIX=${ENGINE_IMAGGA_PREFIX}
+#      - ENGINE_IMAGGA_ENABLED=${ENGINE_IMAGGA_ENABLED}
+#      - ENGINE_IMAGGA_API_KEY=${ENGINE_IMAGGA_API_KEY}
+#      - ENGINE_IMAGGA_API_SECRET=${ENGINE_IMAGGA_API_SECRET}
+#      - ENGINE_IMAGGA_API_URL=${ENGINE_IMAGGA_API_URL}
+      - STASHER_CONSOLE_NAME=${STASHER_CONSOLE_NAME}
+      - STASHER_CONSOLE_ENABLED=${STASHER_CONSOLE_ENABLED}
+      - STASHER_PLEX_NAME=${STASHER_PLEX_NAME}
+      - STASHER_PLEX_ENABLED=${STASHER_PLEX_ENABLED}
+      - STASHER_PLEX_TOKEN=${STASHER_PLEX_TOKEN}
+      - STASHER_PLEX_URL=${STASHER_PLEX_URL}
+      - STASHER_PLEX_SECTION=${STASHER_PLEX_SECTION}
+      - DB_URL=${DB_URL}
+      - ENGINE_COMPREFACE_NAME=${ENGINE_COMPREFACE_NAME}
+      - ENGINE_COMPREFACE_PREFIX=${ENGINE_COMPREFACE_PREFIX}
+      - ENGINE_COMPREFACE_ENABLED=${ENGINE_COMPREFACE_ENABLED}
+      - ENGINE_COMPREFACE_API_KEY=${ENGINE_COMPREFACE_API_KEY}
+      - ENGINE_COMPREFACE_API_PORT=${ENGINE_COMPREFACE_API_PORT}
+      - ENGINE_COMPREFACE_API_URL=${ENGINE_COMPREFACE_API_URL}
+      - ENGINE_COMPREFACE_FACES_FOLDER=${ENGINE_COMPREFACE_FACES_FOLDER}
+      - ENGINE_COMPREFACE_FACES_CONFIG=${ENGINE_COMPREFACE_FACES_CONFIG}
+      - NOTIFIER_EMAIL_NAME=${NOTIFIER_EMAIL_NAME}
+      - NOTIFIER_EMAIL_ENABLED=${NOTIFIER_EMAIL_ENABLED}
+      - NOTIFIER_EMAIL_FROM=${NOTIFIER_EMAIL_FROM}
+      - NOTIFIER_EMAIL_TO=${NOTIFIER_EMAIL_TO}
+      - NOTIFIER_EMAIL_SERVER=${NOTIFIER_EMAIL_SERVER}
+      - NOTIFIER_EMAIL_PORT=${NOTIFIER_EMAIL_PORT}
+      - NOTIFIER_EMAIL_SSL=${NOTIFIER_EMAIL_SSL}
+      - NOTIFIER_EMAIL_STARTTLS=${NOTIFIER_EMAIL_STARTTLS}
+      - NOTIFIER_EMAIL_USERNAME=${NOTIFIER_EMAIL_USERNAME}
+      - NOTIFIER_EMAIL_PASSWORD=${NOTIFIER_EMAIL_PASSWORD}
+      - VERSION=${VERSION}
+    volumes:
+      - type: bind
+        source: ./data/faces
+        target: /app/data/faces
+      - type: volume
+        source: tigertag-db
+        target: /app/data/db

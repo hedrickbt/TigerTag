@@ -38,7 +38,7 @@ ENGINE_IMAGGA_ENABLED=True
 ENGINE_IMAGGA_API_KEY=<VALUE>
 ENGINE_IMAGGA_API_SECRET=<VALUE>
 ENGINE_IMAGGA_API_URL="https://api.imagga.com/v2"
-DB_URL="sqlite:///tigertag.db"
+DB_URL="sqlite:///data/db/tigertag.db"
 
 Look in main.py for an in-depth example of environment variables
 

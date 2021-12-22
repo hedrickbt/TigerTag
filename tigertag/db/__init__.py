@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 
@@ -147,6 +148,7 @@ class Persist:
             logger.debug('Set existing resource to rescan {}'.format(location))
             resource = existing_resource.Resource
             resource.hashval = 'rescan'
+            resource.last_indexed = datetime.datetime.now()
             return Persist._row_to_dict(resource)
 
     def get_resource_by_id(self, id):

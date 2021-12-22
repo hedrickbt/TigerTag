@@ -1,0 +1,8 @@
+faces:
+  - tag: MyFace
+    images:
+      - name: myface1.jpg
+  - tag: DadsFace
+    images:
+      - name: friend/friendface1.jpg
+      - name: friend/friendface2.jpg
